@@ -92,7 +92,7 @@ export default function RoomList() {
 						backgroundColor: colors.surface, 
 						borderRadius: 20, 
 						paddingHorizontal: 16, 
-						paddingVertical: 8, 
+						paddingVertical: 2, 
 						borderWidth: 1, 
 						borderColor: colors.border 
 					}}>

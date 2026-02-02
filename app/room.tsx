@@ -10,6 +10,7 @@ import ChatBubble from '../components/ChatBubble';
 import GroupChat from '../components/GroupChat';
 import ScheduleMessageDialog from '../components/ScheduleMessageDialog';
 import ScheduledMessagesList from '../components/ScheduledMessagesList';
+import SemanticSearchSheet from '../components/SemanticSearchSheet';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
@@ -46,6 +47,7 @@ export default function Room() {
 	const [showGroupMembers, setShowGroupMembers] = useState(false);
 	const [showScheduleDialog, setShowScheduleDialog] = useState(false);
 	const [showScheduledMessages, setShowScheduledMessages] = useState(false);
+	const [showSemanticSearch, setShowSemanticSearch] = useState(false);
 
 	// Handle offline mode and load offline messages
 	useEffect(() => {
@@ -78,17 +80,17 @@ export default function Room() {
 		});
 	};
 
-	// Helper functions for presence and group management
 	const getUserPresence = () => {
 		if(!user) return '';
 		if(!activeRoom) return '';
 		if(activeRoom.is_group) return ''
 		const otherUid = (activeRoom.members || []).find((m: any) => m.uid !== user.uid);
 		if(!otherUid) return '';
-		if (userPresence[otherUid]?.is_online) return 'Online';
-		console.log(userPresence[otherUid]);
-		return `Last seen ${formatLastSeen(userPresence[otherUid]?.last_seen || null)}`;
-	};
+		console.log(userPresence[otherUid].is_online);
+		if (userPresence[otherUid].is_online === true) return 'Online';
+		if(userPresence[otherUid]?.last_seen) return `Last seen ${formatLastSeen(userPresence[otherUid]?.last_seen || null)}`;
+		return 'Last seen a while ago';
+	}
 
 	const getMemberName = (uid: string) => {
 		const friend = user?.friend_list?.find(f => f.uid === uid);
@@ -423,6 +425,12 @@ export default function Room() {
 							/>
 						)}
 						<IconButton
+							icon="magnify"
+							size={24}
+							iconColor={colors.text}
+							onPress={() => setShowSemanticSearch(true)}
+						/>
+						<IconButton
 							icon="clock-outline"
 							size={24}
 							iconColor={colors.text}
@@ -737,6 +745,12 @@ export default function Room() {
 				roomId={activeChatRoomId}
 				visible={showScheduledMessages}
 				onClose={() => setShowScheduledMessages(false)}
+			/>
+
+			<SemanticSearchSheet
+				roomId={activeChatRoomId}
+				visible={showSemanticSearch}
+				onClose={() => setShowSemanticSearch(false)}
 			/>
 		</SafeAreaView>
 	)

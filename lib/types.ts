@@ -214,3 +214,16 @@ export type ScheduledMessagesListResponse = {
 	scheduledMessages?: ScheduledMessage[];
 	error?: string;
 }
+
+// Semantic search (vector search in room messages)
+export type SemanticSearchResult = {
+	message: ChatMessage & { chatDocId?: string };
+	score: number;
+};
+
+export type SemanticSearchResponse = {
+	success: boolean;
+	results?: SemanticSearchResult[];
+	message?: string;
+	error?: string;
+};
