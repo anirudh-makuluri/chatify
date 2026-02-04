@@ -20,32 +20,33 @@ export default function GlassSurface({
 }: Props) {
 	const { isDark } = useTheme();
 
-	// A subtle tinted overlay to keep contrast consistent
-	const overlayColor = isDark ? 'rgba(15, 23, 42, 0.35)' : 'rgba(255, 255, 255, 0.35)';
+	// Softer overlay so it doesn't look like a solid white block in light mode
+	const overlayColor = isDark
+		? 'rgba(15, 23, 42, 0.40)' // slate-900 with a bit more opacity
+		: 'rgba(15, 23, 42, 0.04)'; // very subtle tint on light background
 	const borderColor = isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(2, 6, 23, 0.08)';
 
-	// If the native view isn't present in the current binary, don't attempt to render it.
-	// This avoids warnings like "ExpoBlurView isn't exported" when the dev client hasn't been rebuilt yet.
+	// Only render blur if the native view manager exists (avoids warnings on stale dev clients)
 	const blurAvailable =
-		Platform.OS === 'web' ? false : Boolean(UIManager.getViewManagerConfig?.('ExpoBlurView'));
+		Platform.OS !== 'web' && !!UIManager.getViewManagerConfig?.('ExpoBlurView');
 
 	return (
 		<View
 			style={[
-				styles.wrap,
 				border ? { borderColor, borderWidth: 1 } : { borderWidth: 0 },
 				{ borderRadius: rounded },
 				style,
 			]}
 		>
-			{/* Blur layer */}
-			{blurAvailable ? (
+			{/* Blur layer where available */}
+			{blurAvailable && (
 				<BlurView
 					intensity={intensity}
 					tint={isDark ? 'dark' : 'light'}
 					style={[StyleSheet.absoluteFill, { borderRadius: rounded }]}
 				/>
-			) : null}
+			)}
+
 			{/* Tint overlay */}
 			<View
 				pointerEvents="none"
@@ -57,7 +58,7 @@ export default function GlassSurface({
 					},
 				]}
 			/>
-			<View style={styles.inner}>{children}</View>
+			<View>{children}</View>
 		</View>
 	);
 }
@@ -65,7 +66,6 @@ export default function GlassSurface({
 const styles = StyleSheet.create({
 	wrap: {
 		overflow: 'hidden',
-		// iOS: more natural glass shadow; Android: keep light to avoid heavy perf cost
 		shadowColor: '#000',
 		shadowOffset: { width: 0, height: 10 },
 		shadowOpacity: Platform.OS === 'ios' ? 0.12 : 0.06,

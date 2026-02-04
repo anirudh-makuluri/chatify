@@ -207,7 +207,7 @@ export default function Page() {
 			<View style={styles.content}>
 				{/* Header */}
 				<View style={styles.headerOuter}>
-					<GlassSurface intensity={24} rounded={22} style={styles.headerGlass}>
+					<GlassSurface intensity={24} rounded={22} border={false} style={styles.headerGlass}>
 						<View style={styles.header}>
 							<Text style={[styles.headerTitle, { color: colors.text }]}>
 								{currentTab === 'chats'
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
 		paddingTop: 8,
 	},
 	headerGlass: {
-		borderWidth: 1,
+		borderWidth: 0,
 	},
 	header: {
 		flexDirection: 'row',
