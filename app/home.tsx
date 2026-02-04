@@ -175,15 +175,30 @@ export default function Page() {
 
 	return (
 		<View style={{ flex: 1, backgroundColor: colors.background }}>
-			<Appbar.Header style={{ backgroundColor: colors.surface, elevation: 2 }}>
-				<HamburgerMenu 
+			<Appbar.Header
+				style={{
+					backgroundColor: colors.surface,
+					elevation: 0,
+					borderBottomWidth: 1,
+					borderBottomColor: colors.border,
+				}}
+			>
+				<HamburgerMenu
 					onHomePress={() => setCurrentView('home')}
 					onFriendsPress={() => setCurrentView('friends')}
 					onUserProfilePress={() => setCurrentView('profile')}
 					onCreateGroupPress={() => setShowGroupModal(true)}
 					onLogoutPress={handleLogout}
 				/>
-				<Appbar.Content title="Chatify" titleStyle={{ color: colors.text, fontWeight: 'bold' }} />
+				<Appbar.Content
+					title="Chatify"
+					titleStyle={{
+						color: colors.text,
+						fontWeight: '700',
+						fontSize: 20,
+						letterSpacing: -0.3,
+					}}
+				/>
 			</Appbar.Header>
 			{renderCurrentView()}
 			

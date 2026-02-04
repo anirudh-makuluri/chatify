@@ -371,19 +371,28 @@ export default function Room() {
 	};
 
 	return (
-		<SafeAreaView style={{ backgroundColor: colors.background }}>
-			<View style={{ width: '100%', height: '100%', backgroundColor: colors.background }}>
-				<View style={{ 
-					paddingHorizontal: 8, 
-					paddingVertical: 16, 
-					backgroundColor: colors.surface, 
-					flexDirection: 'row', 
-					justifyContent: 'space-between', 
-					alignItems: 'center' 
-				}}>
+		<SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+			<View style={{ flex: 1, backgroundColor: colors.background }}>
+				<View
+					style={{
+						paddingHorizontal: 12,
+						paddingVertical: 12,
+						backgroundColor: colors.surface,
+						flexDirection: 'row',
+						justifyContent: 'space-between',
+						alignItems: 'center',
+						borderBottomWidth: 1,
+						borderBottomColor: colors.border,
+					}}
+				>
 					<View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-						<Button onPress={handleBackButton} mode='text' style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-							<Icon source={'chevron-left'} size={28} />
+						<Button
+							onPress={handleBackButton}
+							mode="text"
+							style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}
+							iconColor={colors.primary}
+						>
+							<Icon source="chevron-left" size={28} color={colors.primary} />
 						</Button>
 						<View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
 							<Avatar.Image size={48} style={{ marginRight: 8 }} source={{ uri: activeRoom?.photo_url }} />
@@ -427,7 +436,7 @@ export default function Room() {
 						<IconButton
 							icon="magnify"
 							size={24}
-							iconColor={colors.text}
+							iconColor={colors.primary}
 							onPress={() => setShowSemanticSearch(true)}
 						/>
 						<IconButton
@@ -449,7 +458,7 @@ export default function Room() {
 								<IconButton
 									icon="robot"
 									size={24}
-									iconColor={colors.text}
+									iconColor={colors.primary}
 									onPress={() => setAiMenuVisible(true)}
 								/>
 							}
@@ -470,25 +479,33 @@ export default function Room() {
 			
 			{/* Upload Progress */}
 			{uploading && (
-				<View style={{ 
-					paddingHorizontal: 16, 
-					paddingVertical: 8, 
-					backgroundColor: colors.surface 
-				}}>
-					<Text style={{ fontSize: 14, color: colors.text, marginBottom: 4 }}>Uploading...</Text>
-					<ProgressBar progress={uploadProgress} />
+				<View
+					style={{
+						paddingHorizontal: 16,
+						paddingVertical: 10,
+						backgroundColor: colors.muted,
+						borderTopWidth: 1,
+						borderTopColor: colors.border,
+					}}
+				>
+					<Text style={{ fontSize: 14, color: colors.text, marginBottom: 6, fontWeight: '500' }}>
+						Uploading...
+					</Text>
+					<ProgressBar progress={uploadProgress} color={colors.primary} />
 				</View>
 			)}
 
 			{/* Smart Replies */}
 			{showSmartReplies && (
-				<View style={{ 
-					paddingHorizontal: 16, 
-					paddingVertical: 8, 
-					backgroundColor: colors.surface, 
-					borderTopWidth: 1, 
-					borderTopColor: colors.border 
-				}}>
+				<View
+					style={{
+						paddingHorizontal: 16,
+						paddingVertical: 12,
+						backgroundColor: colors.surface,
+						borderTopWidth: 1,
+						borderTopColor: colors.border,
+					}}
+				>
 					<View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
 						<Text style={{ fontSize: 12, color: colors.text }}>
 							Smart replies for: "{testMessage}"
@@ -511,7 +528,8 @@ export default function Room() {
 										setInput(reply);
 										setShowSmartReplies(false);
 									}}
-									style={{ marginBottom: 4 }}
+									style={{ marginRight: 8, marginBottom: 6, borderColor: colors.primary }}
+									labelStyle={{ color: colors.primary }}
 								>
 									{reply}
 								</Button>
@@ -530,35 +548,45 @@ export default function Room() {
 			
 			{/* Offline message indicator */}
 			{userIsOffline && (
-				<View style={{ 
-					paddingHorizontal: 16, 
-					paddingVertical: 8, 
-					backgroundColor: colors.surface, 
-					borderTopWidth: 1, 
-					borderTopColor: colors.border 
-				}}>
+				<View
+					style={{
+						paddingHorizontal: 16,
+						paddingVertical: 10,
+						backgroundColor: colors.muted,
+						borderTopWidth: 1,
+						borderTopColor: colors.border,
+					}}
+				>
 					<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-						<Icon source="wifi-off" size={16} color='#ea580c' />
-						<Text style={{ 
-							fontSize: 12, 
-							color: '#ea580c', 
-							flex: 1, 
-							marginLeft: 8 
-						}}>
+						<Icon source="wifi-off" size={18} color={colors.destructive} />
+						<Text
+							style={{
+								fontSize: 13,
+								color: colors.destructive,
+								flex: 1,
+								marginLeft: 10,
+								fontWeight: '500',
+							}}
+						>
 							You're offline. Messages will be sent when connection is restored.
 						</Text>
 					</View>
 				</View>
 			)}
 
-			<View style={{ 
-				flexDirection: 'row', 
-				alignItems: 'center', 
-				width: '100%', 
-				gap: 8, 
-				padding: 8,
-				backgroundColor: colors.surface
-			}}>
+			<View
+				style={{
+					flexDirection: 'row',
+					alignItems: 'center',
+					width: '100%',
+					gap: 4,
+					paddingHorizontal: 12,
+					paddingVertical: 10,
+					backgroundColor: colors.surface,
+					borderTopWidth: 1,
+					borderTopColor: colors.border,
+				}}
+			>
 				<Menu
 					visible={attachMenuVisible}
 					onDismiss={() => setAttachMenuVisible(false)}
@@ -580,22 +608,22 @@ export default function Room() {
 				<TextInput
 					ref={textInputRef}
 					value={input}
+					mode="outlined"
 					onChangeText={(e) => {
 						setInput(e);
-						// Clear smart replies when user starts typing
-						if (e.length > 0 && showSmartReplies) {
-							setShowSmartReplies(false);
-						}
+						if (e.length > 0 && showSmartReplies) setShowSmartReplies(false);
 					}}
-					placeholder={userIsOffline ? "Type a message (offline)..." : "Type a message..."}
-					style={{ flex: 1 }}
+					placeholder={userIsOffline ? 'Type a message (offline)...' : 'Type a message...'}
+					style={{ flex: 1, backgroundColor: colors.background, borderRadius: 24 }}
 					disabled={uploading}
+					outlineColor={colors.border}
+					activeOutlineColor={colors.primary}
+					textColor={colors.text}
 				/>
-				
 				<IconButton
 					icon="send"
 					size={24}
-					iconColor={colors.text}
+					iconColor={input.trim() ? colors.primary : colors.textSecondary}
 					onPress={sendMessage}
 					disabled={uploading || !input.trim()}
 				/>

@@ -32,32 +32,59 @@ export default function RoomList() {
 
 	const renderEmptyState = () => (
 		<View className="justify-center items-center px-8 py-16 mt-10">
-			<View style={{ 
-				width: 96, 
-				height: 96, 
-				backgroundColor: colors.surface, 
-				borderRadius: 48, 
-				alignItems: 'center', 
-				justifyContent: 'center', 
-				marginBottom: 24 
-			}}>
-				<Icon source="chat" size={48} color="#3b82f6" />
+			<View
+				style={{
+					width: 96,
+					height: 96,
+					backgroundColor: colors.muted,
+					borderRadius: 48,
+					alignItems: 'center',
+					justifyContent: 'center',
+					marginBottom: 24,
+				}}
+			>
+				<Icon source="chat" size={48} color={colors.primary} />
 			</View>
-			<Text style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 8, color: colors.text }}>
+			<Text
+				style={{
+					fontSize: 22,
+					fontWeight: '700',
+					textAlign: 'center',
+					marginBottom: 8,
+					color: colors.text,
+				}}
+			>
 				No Chats Yet
 			</Text>
-			<Text style={{ color: colors.textSecondary, textAlign: 'center', marginBottom: 24 }}>
+			<Text
+				style={{
+					color: colors.textSecondary,
+					textAlign: 'center',
+					marginBottom: 24,
+					fontSize: 15,
+					lineHeight: 22,
+				}}
+			>
 				Start a conversation by adding friends or creating a group chat
 			</Text>
-			<View style={{ 
-				backgroundColor: colors.surface, 
-				borderRadius: 12, 
-				padding: 16, 
-				borderWidth: 1, 
-				borderColor: colors.border, 
-				marginBottom: 16 
-			}}>
-				<Text style={{ color: '#3b82f6', textAlign: 'center', fontWeight: '500' }}>
+			<View
+				style={{
+					backgroundColor: colors.surface,
+					borderRadius: 14,
+					padding: 16,
+					borderWidth: 1,
+					borderColor: colors.border,
+					marginBottom: 20,
+				}}
+			>
+				<Text
+					style={{
+						color: colors.primary,
+						textAlign: 'center',
+						fontWeight: '600',
+						fontSize: 14,
+					}}
+				>
 					💡 Go to Friends tab to add new friends and start chatting!
 				</Text>
 			</View>
@@ -65,7 +92,7 @@ export default function RoomList() {
 				mode="contained"
 				onPress={() => setShowCreateGroup(true)}
 				icon="account-multiple-plus"
-				style={{ backgroundColor: '#3b82f6' }}
+				style={{ backgroundColor: colors.primary, borderRadius: 12 }}
 			>
 				Create Group Chat
 			</Button>
@@ -73,32 +100,43 @@ export default function RoomList() {
 	);
 
 	return (
-		<SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-			<View style={{ 
-				paddingHorizontal: 16, 
-				paddingVertical: 16, 
-				borderBottomWidth: 1, 
-				borderBottomColor: colors.border 
-			}}>
+		<SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['bottom']}>
+			<View
+				style={{
+					paddingHorizontal: 16,
+					paddingVertical: 16,
+					borderBottomWidth: 1,
+					borderBottomColor: colors.border,
+					backgroundColor: colors.background,
+				}}
+			>
 				<View className="flex-row items-center justify-between mb-4">
-					<Text style={{ fontSize: 24, fontWeight: 'bold', color: colors.text }}>
+					<Text
+						style={{
+							fontSize: 26,
+							fontWeight: '700',
+							color: colors.text,
+							letterSpacing: -0.3,
+						}}
+					>
 						Chats
 					</Text>
 				</View>
-				
 				<View className="flex-row items-center gap-3 mb-2">
-					<View style={{ 
-						flex: 1, 
-						backgroundColor: colors.surface, 
-						borderRadius: 20, 
-						paddingHorizontal: 16, 
-						paddingVertical: 2, 
-						borderWidth: 1, 
-						borderColor: colors.border 
-					}}>
-						<Searchbar 
-							placeholder="Search conversations..." 
-							value={searchQuery} 
+					<View
+						style={{
+							flex: 1,
+							backgroundColor: colors.muted,
+							borderRadius: 14,
+							paddingHorizontal: 4,
+							paddingVertical: 2,
+							borderWidth: 1,
+							borderColor: colors.border,
+						}}
+					>
+						<Searchbar
+							placeholder="Search conversations..."
+							value={searchQuery}
 							onChangeText={setSearchQuery}
 							style={{ backgroundColor: 'transparent', elevation: 0 }}
 							placeholderTextColor={colors.textSecondary}
@@ -132,15 +170,17 @@ export default function RoomList() {
 				if (roomsToShow.length === 0 && searchQuery) {
 					return (
 						<View className="flex-1 justify-center items-center px-8 py-16">
-							<View style={{ 
-								width: 80, 
-								height: 80, 
-								backgroundColor: colors.surface, 
-								borderRadius: 40, 
-								alignItems: 'center', 
-								justifyContent: 'center', 
-								marginBottom: 16 
-							}}>
+							<View
+								style={{
+									width: 80,
+									height: 80,
+									backgroundColor: colors.muted,
+									borderRadius: 40,
+									alignItems: 'center',
+									justifyContent: 'center',
+									marginBottom: 16,
+								}}
+							>
 								<Icon source="magnify" size={40} color={colors.textSecondary} />
 							</View>
 							<Text style={{ 

@@ -1,5 +1,4 @@
 import { router } from 'expo-router';
-import React from 'react'
 import { View } from 'react-native'
 import { Avatar, Card, Text, Chip } from 'react-native-paper'
 import { useUser } from '~/app/providers';
@@ -70,87 +69,124 @@ export default function RoomDisplayItem({ roomData }: { roomData: TRoomData }) {
 	const isAIRoom = roomData.is_ai_room || roomData.roomId.startsWith('ai-assistant-');
 
 	return (
-		<Card 
+		<Card
 			onPress={changeActiveRoom}
-			style={isAIRoom ? { 
-				backgroundColor: colors.surface, 
-				borderLeftWidth: 4, 
-				borderLeftColor: '#6366f1',
-				shadowColor: '#6366f1',
-				shadowOffset: { width: 0, height: 2 },
-				shadowOpacity: 0.1,
-				shadowRadius: 4,
-				elevation: 3
-			} : {
-				backgroundColor: colors.surface,
-				shadowColor: '#000',
-				shadowOffset: { width: 0, height: 1 },
-				shadowOpacity: 0.1,
-				shadowRadius: 3,
-				elevation: 2
-			}}
+			style={
+				isAIRoom
+					? {
+							backgroundColor: colors.surface,
+							borderLeftWidth: 4,
+							borderLeftColor: colors.primary,
+							borderRadius: 14,
+							borderWidth: 1,
+							borderColor: colors.border,
+							shadowColor: colors.primary,
+							shadowOffset: { width: 0, height: 2 },
+							shadowOpacity: 0.12,
+							shadowRadius: 6,
+							elevation: 3,
+						}
+					: {
+							backgroundColor: colors.surface,
+							borderRadius: 14,
+							borderWidth: 1,
+							borderColor: colors.border,
+							shadowColor: '#000',
+							shadowOffset: { width: 0, height: 1 },
+							shadowOpacity: 0.06,
+							shadowRadius: 4,
+							elevation: 2,
+						}
+			}
 			className="mx-4 mb-3"
 		>
-			<Card.Content className='flex flex-row items-center gap-4 py-4'>
+			<Card.Content className="flex flex-row items-center gap-4 py-4 h-[72px]">
 				<View className="relative">
-					<Avatar.Image 
-						size={52} 
-						source={{ 
-							uri: isAIRoom 
-								? 'https://ui-avatars.com/api/?name=AI&background=6366f1&color=ffffff' 
-								: roomData.photo_url 
+					<Avatar.Image
+						size={52}
+						source={{
+							uri: isAIRoom
+								? 'https://ui-avatars.com/api/?name=AI&background=3b82f6&color=ffffff'
+								: roomData.photo_url,
 						}}
-						style={{ borderWidth: 2, borderColor: isAIRoom ? '#6366f1' : colors.border }}
+						style={{
+							borderWidth: 2,
+							borderColor: isAIRoom ? colors.primary : colors.border,
+						}}
 					/>
 					{isAIRoom && (
-						<View className="absolute -bottom-1 -right-1 bg-purple-500 rounded-full w-6 h-6 items-center justify-center">
-							<Text className="text-white text-xs font-bold">AI</Text>
+						<View
+							style={{
+								position: 'absolute',
+								bottom: -2,
+								right: -2,
+								backgroundColor: colors.primary,
+								borderRadius: 12,
+								width: 24,
+								height: 24,
+								alignItems: 'center',
+								justifyContent: 'center',
+							}}
+						>
+							<Text style={{ color: '#fff', fontSize: 10, fontWeight: '700' }}>AI</Text>
 						</View>
 					)}
 				</View>
 				<View className="flex-1">
 					<View className="flex-row items-center gap-2 mb-1">
-						<Text style={{ 
-							fontSize: 16, 
-							fontWeight: '600', 
-							color: colors.text 
-						}}>
+						<Text
+							style={{
+								fontSize: 16,
+								fontWeight: '600',
+								color: colors.text,
+							}}
+						>
 							{roomData.name}
 						</Text>
 						{isAIRoom && (
-							<View style={{ 
-								backgroundColor: colors.surface, 
-								paddingHorizontal: 8, 
-								paddingVertical: 4, 
-								borderRadius: 12,
-								borderWidth: 1,
-								borderColor: colors.border
-							}}>
-								<Text style={{ 
-									color: '#8b5cf6', 
-									fontSize: 10, 
-									fontWeight: '500' 
-								}}>AI Assistant</Text>
+							<View
+								style={{
+									backgroundColor: colors.muted,
+									paddingHorizontal: 8,
+									paddingVertical: 4,
+									borderRadius: 10,
+									borderWidth: 1,
+									borderColor: colors.border,
+								}}
+							>
+								<Text
+									style={{
+										color: colors.primary,
+										fontSize: 10,
+										fontWeight: '600',
+									}}
+								>
+									AI Assistant
+								</Text>
 							</View>
 						)}
 					</View>
-					<Text style={{ 
-						fontSize: 14, 
-						color: colors.textSecondary,
-						numberOfLines: 2 
-					}}>
+					<Text
+						style={{
+							fontSize: 14,
+							color: colors.textSecondary
+						}}
+						className='truncate h-[36px]'
+					>
 						{getLastMessage()}
 					</Text>
 				</View>
 				<View className="items-end">
-					<Text style={{ 
-						fontSize: 12, 
-						color: colors.textSecondary 
-					}}>
+					<Text
+						style={{
+							fontSize: 12,
+							color: colors.textSecondary,
+						}}
+					>
 						{getLastMessageTime()}
 					</Text>
 				</View>
 			</Card.Content>
 		</Card>
-	)
+	);
 }

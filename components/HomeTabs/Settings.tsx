@@ -83,12 +83,12 @@ export default function Settings() {
 								size={20}
 								onPress={handleImagePicker}
 								disabled={isUploading}
-								iconColor='#3b82f6'
-								style={{ 
-									position: 'absolute', 
-									bottom: 0, 
+								iconColor={colors.primary}
+								style={{
+									position: 'absolute',
+									bottom: 0,
 									right: 0,
-									backgroundColor: colors.surface
+									backgroundColor: colors.surface,
 								}}
 							/>
 							{isUploading && (
@@ -111,7 +111,7 @@ export default function Settings() {
 									<IconButton
 										icon="check"
 										onPress={handleNameUpdate}
-										iconColor="#10b981"
+										iconColor={colors.primary}
 									/>
 									<IconButton
 										icon="close"
@@ -119,7 +119,7 @@ export default function Settings() {
 											setIsEditingName(false);
 											setNewName(user.name);
 										}}
-										iconColor="#ef4444"
+										iconColor={colors.destructive}
 									/>
 								</View>
 							) : (
@@ -142,20 +142,39 @@ export default function Settings() {
 				)}
 
 				{/* Dark Mode Toggle */}
-				<Card style={{ marginTop: 24, backgroundColor: colors.surface }}>
+				<Card
+					style={{
+						marginTop: 24,
+						backgroundColor: colors.surface,
+						borderRadius: 16,
+						borderWidth: 1,
+						borderColor: colors.border,
+					}}
+				>
 					<Card.Content>
-						<Text variant="titleMedium" style={{ color: colors.text, marginBottom: 16 }}>
+						<Text
+							variant="titleMedium"
+							style={{
+								color: colors.text,
+								marginBottom: 16,
+								fontWeight: '600',
+							}}
+						>
 							Appearance
 						</Text>
-						
 						<List.Item
 							title="Dark Mode"
-							description={isDark ? "Dark theme is enabled" : "Light theme is enabled"}
-							left={(props) => <List.Icon {...props} icon="theme-light-dark" />}
+							titleStyle={{ color: colors.text, fontWeight: '500' }}
+							description={isDark ? 'Dark theme is enabled' : 'Light theme is enabled'}
+							descriptionStyle={{ color: colors.textSecondary }}
+							left={(props) => (
+								<List.Icon {...props} icon="theme-light-dark" color={colors.primary} />
+							)}
 							right={() => (
 								<Switch
 									value={isDark}
 									onValueChange={toggleTheme}
+									color={colors.primary}
 								/>
 							)}
 						/>

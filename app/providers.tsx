@@ -2,12 +2,12 @@ import { ReactNode, createContext, useContext, useEffect, useState } from 'react
 import { customFetch } from '../lib/utils';
 import { TAuthUser } from '../lib/types';
 import ReduxProvider from '../redux/redux-provider';
-import { MD3LightTheme as DefaultTheme, PaperProvider } from 'react-native-paper';
+import { MD3LightTheme, MD3DarkTheme, PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { offlineStorage } from '../lib/offlineStorage';
 import NetInfo from '@react-native-community/netinfo';
-import { ThemeProvider } from '../lib/themeContext';
+import { ThemeProvider, useTheme } from '../lib/themeContext';
 
 
 type TUserContext = {
@@ -32,14 +32,39 @@ const UserContext = createContext<TUserContext>({
 	loginOffline: () => { }
 });
 
-const theme = {
-	...DefaultTheme,
+const lightPaperTheme = {
+	...MD3LightTheme,
 	colors: {
-		...DefaultTheme.colors,
-		primary: '#16A34A',
-		secondary: '#F4F4F5',
+		...MD3LightTheme.colors,
+		primary: '#3b82f6',
+		primaryContainer: '#dbeafe',
+		secondary: '#f1f5f9',
+		surface: '#ffffff',
+		surfaceVariant: '#f8fafc',
+		outline: '#e2e8f0',
 	},
 };
+
+const darkPaperTheme = {
+	...MD3DarkTheme,
+	colors: {
+		...MD3DarkTheme.colors,
+		primary: '#3b82f6',
+		primaryContainer: '#1e3a5f',
+		secondary: '#1e293b',
+		surface: '#1e293b',
+		surfaceVariant: '#334155',
+		outline: '#334155',
+		background: '#0f172a',
+		onSurface: '#e2e8f0',
+		onSurfaceVariant: '#94a3b8',
+	},
+};
+
+function PaperThemeGate({ children }: { children: ReactNode }) {
+	const { isDark } = useTheme();
+	return <PaperProvider theme={isDark ? darkPaperTheme : lightPaperTheme}>{children}</PaperProvider>;
+}
 
 export function Providers({ children }: { children: ReactNode }) {
 	const [user, setUser] = useState<TAuthUser | null>(null);
@@ -154,9 +179,7 @@ export function Providers({ children }: { children: ReactNode }) {
 			<ThemeProvider>
 				<UserContext.Provider value={{ user, login, logout, isLoading, isLoggingOut, isOffline, updateUser, loginOffline }}>
 					<ReduxProvider>
-						<PaperProvider theme={theme}>
-							{children}
-						</PaperProvider>
+						<PaperThemeGate>{children}</PaperThemeGate>
 					</ReduxProvider>
 				</UserContext.Provider>
 			</ThemeProvider>

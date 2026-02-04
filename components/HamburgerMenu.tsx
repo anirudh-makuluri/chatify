@@ -150,7 +150,7 @@ export default function HamburgerMenu({ onHomePress, onFriendsPress, onUserProfi
                   <IconButton
                     icon="home"
                     size={24}
-                    iconColor="#3b82f6"
+                    iconColor={colors.primary}
                     style={{ margin: 0, marginRight: 12 }}
                   />
                   <Text variant="titleMedium" style={{ color: colors.text, fontWeight: '500' }}>
@@ -170,7 +170,7 @@ export default function HamburgerMenu({ onHomePress, onFriendsPress, onUserProfi
                   <IconButton
                     icon="account-multiple"
                     size={24}
-                    iconColor="#3b82f6"
+                    iconColor={colors.primary}
                     style={{ margin: 0, marginRight: 12 }}
                   />
                   <Text variant="titleMedium" style={{ color: colors.text, fontWeight: '500' }}>
@@ -190,7 +190,7 @@ export default function HamburgerMenu({ onHomePress, onFriendsPress, onUserProfi
                   <IconButton
                     icon="account-group"
                     size={24}
-                    iconColor="#3b82f6"
+                    iconColor={colors.primary}
                     style={{ margin: 0, marginRight: 12 }}
                   />
                   <Text variant="titleMedium" style={{ color: colors.text, fontWeight: '500' }}>
@@ -210,10 +210,10 @@ export default function HamburgerMenu({ onHomePress, onFriendsPress, onUserProfi
                   <IconButton
                     icon="logout"
                     size={24}
-                    iconColor="#ef4444"
+                    iconColor={colors.destructive}
                     style={{ margin: 0, marginRight: 12 }}
                   />
-                  <Text variant="titleMedium" style={{ color: '#ef4444', fontWeight: '500' }}>
+                  <Text variant="titleMedium" style={{ color: colors.destructive, fontWeight: '500' }}>
                     Logout
                   </Text>
                 </TouchableOpacity>

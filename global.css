@@ -4,51 +4,94 @@
 
 @layer base {
 	:root {
+		/* Typography */
+		--font-heading: var(--font-sora);
+		--font-body: var(--font-outfit);
+
+		/* Light Mode Color Palette - Blue Theme */
 		--background: 0 0% 100%;
-		--foreground: 240 10% 3.9%;
+		--foreground: 222 47% 11%;
 		--card: 0 0% 100%;
-		--card-foreground: 240 10% 3.9%;
+		--card-foreground: 222 47% 11%;
 		--popover: 0 0% 100%;
-		--popover-foreground: 240 10% 3.9%;
-		--primary: 142.1 76.2% 36.3%;
-		--primary-foreground: 355.7 100% 97.3%;
-		--secondary: 240 4.8% 95.9%;
-		--secondary-foreground: 240 5.9% 10%;
-		--muted: 240 4.8% 95.9%;
-		--muted-foreground: 240 3.8% 46.1%;
-		--accent: 240 4.8% 95.9%;
-		--accent-foreground: 240 5.9% 10%;
+		--popover-foreground: 222 47% 11%;
+		--primary: 217 91% 60%;
+		--primary-foreground: 0 0% 100%;
+		--secondary: 210 40% 96%;
+		--secondary-foreground: 222 47% 11%;
+		--muted: 210 40% 96%;
+		--muted-foreground: 215 16% 47%;
+		--accent: 217 91% 60%;
+		--accent-foreground: 0 0% 100%;
 		--destructive: 0 84.2% 60.2%;
 		--destructive-foreground: 0 0% 98%;
-		--border: 240 5.9% 90%;
-		--input: 240 5.9% 90%;
-		--ring: 142.1 76.2% 36.3%;
+		--border: 214 32% 91%;
+		--input: 214 32% 91%;
+		--ring: 217 91% 60%;
 		--radius: 0.75rem;
+
+		/* Landing Page Specific Colors - Light Mode */
+		--landing-bg-start: 214 100% 97%;
+		--landing-bg-mid: 214 100% 99%;
+		--landing-bg-end: 214 100% 100%;
+		--landing-accent-cyan: 195 85% 55%;
+		--landing-accent-blue: 217 91% 60%;
+		--landing-accent-indigo: 239 84% 67%;
+	}
+
+	.light {
+		--background: 0 0% 100%;
+		--foreground: 222 47% 11%;
+		--card: 0 0% 100%;
+		--card-foreground: 222 47% 11%;
+		--popover: 0 0% 100%;
+		--popover-foreground: 222 47% 11%;
+		--primary: 217 91% 60%;
+		--primary-foreground: 0 0% 100%;
+		--secondary: 210 40% 96%;
+		--secondary-foreground: 222 47% 11%;
+		--muted: 210 40% 96%;
+		--muted-foreground: 215 16% 47%;
+		--accent: 217 91% 60%;
+		--accent-foreground: 0 0% 100%;
+		--destructive: 0 84.2% 60.2%;
+		--destructive-foreground: 0 0% 98%;
+		--border: 214 32% 91%;
+		--input: 214 32% 91%;
+		--ring: 217 91% 60%;
 	}
 
 	.dark {
-		--background: 20 14.3% 4.1%;
-		--foreground: 0 0% 95%;
-		--card: 24 9.8% 10%;
-		--card-foreground: 0 0% 95%;
-		--popover: 0 0% 9%;
-		--popover-foreground: 0 0% 95%;
-		--primary: 142.1 70.6% 45.3%;
-		--primary-foreground: 144.9 80.4% 10%;
-		--secondary: 240 3.7% 15.9%;
-		--secondary-foreground: 0 0% 98%;
-		--muted: 0 0% 15%;
-		--muted-foreground: 240 5% 64.9%;
-		--accent: 12 6.5% 15.1%;
-		--accent-foreground: 0 0% 98%;
+		/* Dark Mode Color Palette - Blue Theme */
+		--background: 222 47% 11%;
+		--foreground: 213 31% 91%;
+		--card: 222 47% 11%;
+		--card-foreground: 213 31% 91%;
+		--popover: 222 47% 11%;
+		--popover-foreground: 213 31% 91%;
+		--primary: 217 91% 60%;
+		--primary-foreground: 222 47% 11%;
+		--secondary: 217 33% 17%;
+		--secondary-foreground: 213 31% 91%;
+		--muted: 217 33% 17%;
+		--muted-foreground: 215 20% 65%;
+		--accent: 217 91% 60%;
+		--accent-foreground: 222 47% 11%;
 		--destructive: 0 62.8% 30.6%;
 		--destructive-foreground: 0 85.7% 97.3%;
-		--border: 240 3.7% 15.9%;
-		--input: 240 3.7% 15.9%;
-		--ring: 142.4 71.8% 29.2%;
+		--border: 217 33% 17%;
+		--input: 217 33% 17%;
+		--ring: 217 91% 60%;
+
+		/* Landing Page Specific Colors - Dark Mode */
+		--landing-bg-start: 222 47% 11%;
+		--landing-bg-mid: 217 33% 17%;
+		--landing-bg-end: 222 47% 8%;
+		--landing-accent-cyan: 195 85% 55%;
+		--landing-accent-blue: 217 91% 60%;
+		--landing-accent-indigo: 239 84% 67%;
 	}
 }
-
 
 @layer base {
 	* {
@@ -57,5 +100,15 @@
 
 	body {
 		@apply bg-background text-foreground;
+		font-family: var(--font-body), system-ui, sans-serif;
+	}
+
+	h1, h2, h3, h4, h5, h6 {
+		font-family: var(--font-heading), system-ui, sans-serif;
+	}
+
+	html, body {
+		height: 100%;
+		width: 100%;
 	}
 }

@@ -61,45 +61,58 @@ export default function Friends() {
 
 	const renderEmptyState = () => (
 		<View className="justify-center items-center px-8 py-16">
-			<View style={{ 
-				width: 96, 
-				height: 96, 
-				backgroundColor: colors.surface, 
-				borderRadius: 48, 
-				alignItems: 'center', 
-				justifyContent: 'center', 
-				marginBottom: 24 
-			}}>
-				<Icon source="account-multiple" size={48} color="#10b981" />
+			<View
+				style={{
+					width: 96,
+					height: 96,
+					backgroundColor: colors.muted,
+					borderRadius: 48,
+					alignItems: 'center',
+					justifyContent: 'center',
+					marginBottom: 24,
+				}}
+			>
+				<Icon source="account-multiple" size={48} color={colors.primary} />
 			</View>
-			<Text style={{ 
-				fontSize: 20, 
-				fontWeight: 'bold', 
-				color: colors.text, 
-				textAlign: 'center', 
-				marginBottom: 8 
-			}}>
+			<Text
+				style={{
+					fontSize: 22,
+					fontWeight: '700',
+					color: colors.text,
+					textAlign: 'center',
+					marginBottom: 8,
+				}}
+			>
 				No Friend Requests
 			</Text>
-			<Text style={{ 
-				color: colors.textSecondary, 
-				textAlign: 'center', 
-				marginBottom: 24 
-			}}>
+			<Text
+				style={{
+					color: colors.textSecondary,
+					textAlign: 'center',
+					marginBottom: 24,
+					fontSize: 15,
+					lineHeight: 22,
+				}}
+			>
 				When someone sends you a friend request, it will appear here
 			</Text>
-			<View style={{ 
-				backgroundColor: colors.surface, 
-				borderRadius: 12, 
-				padding: 16, 
-				borderWidth: 1, 
-				borderColor: colors.border 
-			}}>
-				<Text style={{ 
-					color: '#10b981', 
-					textAlign: 'center', 
-					fontWeight: '500' 
-				}}>
+			<View
+				style={{
+					backgroundColor: colors.surface,
+					borderRadius: 14,
+					padding: 16,
+					borderWidth: 1,
+					borderColor: colors.border,
+				}}
+			>
+				<Text
+					style={{
+						color: colors.primary,
+						textAlign: 'center',
+						fontWeight: '600',
+						fontSize: 14,
+					}}
+				>
 					💡 Use the search bar above to find and add new friends!
 				</Text>
 			</View>
@@ -110,36 +123,41 @@ export default function Friends() {
 		<View style={{ flex: 1, backgroundColor: colors.background }}>
 			<SafeAreaView className="flex-1">
 				{/* Header */}
-				<View style={{ 
-					paddingHorizontal: 16, 
-					paddingVertical: 16, 
-					backgroundColor: colors.surface, 
-					borderBottomWidth: 1, 
-					borderBottomColor: colors.border 
-				}}>
-					<Text style={{ 
-						fontSize: 24, 
-						fontWeight: 'bold', 
-						color: colors.text, 
-						marginBottom: 16 
-					}}>
+				<View
+					style={{
+						paddingHorizontal: 16,
+						paddingVertical: 16,
+						backgroundColor: colors.background,
+						borderBottomWidth: 1,
+						borderBottomColor: colors.border,
+					}}
+				>
+					<Text
+						style={{
+							fontSize: 26,
+							fontWeight: '700',
+							color: colors.text,
+							marginBottom: 16,
+							letterSpacing: -0.3,
+						}}
+					>
 						Friends
 					</Text>
-					
-					{/* Search Section */}
 					<View className="flex-row items-center gap-3 mb-4">
-						<View style={{ 
-							flex: 1, 
-							backgroundColor: colors.surface, 
-							borderRadius: 20, 
-							paddingHorizontal: 16, 
-							paddingVertical: 8, 
-							borderWidth: 1, 
-							borderColor: colors.border 
-						}}>
-							<Searchbar 
-								placeholder='Search for a friend' 
-								value={searchUser} 
+						<View
+							style={{
+								flex: 1,
+								backgroundColor: colors.muted,
+								borderRadius: 14,
+								paddingHorizontal: 4,
+								paddingVertical: 4,
+								borderWidth: 1,
+								borderColor: colors.border,
+							}}
+						>
+							<Searchbar
+								placeholder="Search for a friend"
+								value={searchUser}
 								onChangeText={setSearchUser}
 								style={{ backgroundColor: 'transparent', elevation: 0 }}
 								placeholderTextColor={colors.textSecondary}
@@ -147,24 +165,36 @@ export default function Friends() {
 						</View>
 						<IconButton
 							icon="magnify"
-							mode='contained'
+							mode="contained"
 							size={24}
 							iconColor="#fff"
 							onPress={handleSubmitSearch}
-							style={{ backgroundColor: '#3b82f6' }}
+							style={{ backgroundColor: colors.primary, borderRadius: 12 }}
 						/>
 					</View>
-
-					{/* Stats */}
 					<View className="flex-row items-center gap-6">
 						<View className="flex-row items-center gap-2">
-							<View className="w-2 h-2 bg-green-500 rounded-full"></View>
+							<View
+								style={{
+									width: 8,
+									height: 8,
+									borderRadius: 4,
+									backgroundColor: colors.primary,
+								}}
+							/>
 							<Text style={{ fontSize: 14, color: colors.textSecondary }}>
 								{user?.friend_list?.length || 0} friends
 							</Text>
 						</View>
 						<View className="flex-row items-center gap-2">
-							<View className="w-2 h-2 bg-blue-500 rounded-full"></View>
+							<View
+								style={{
+									width: 8,
+									height: 8,
+									borderRadius: 4,
+									backgroundColor: colors.accent,
+								}}
+							/>
 							<Text style={{ fontSize: 14, color: colors.textSecondary }}>
 								{user?.received_friend_requests?.length || 0} requests
 							</Text>
@@ -175,53 +205,77 @@ export default function Friends() {
 				{/* Friend List */}
 				{user?.friend_list && user.friend_list.length > 0 && (
 					<View className="flex-1 mb-4">
-						<View style={{ 
-							paddingHorizontal: 16, 
-							paddingVertical: 12, 
-							backgroundColor: colors.surface, 
-							borderBottomWidth: 1, 
-							borderBottomColor: colors.border 
-						}}>
-							<Text style={{ 
-								fontSize: 14, 
-								fontWeight: '600', 
-								color: colors.text 
-							}}>
+						<View
+							style={{
+								paddingHorizontal: 16,
+								paddingVertical: 12,
+								backgroundColor: colors.background,
+								borderBottomWidth: 1,
+								borderBottomColor: colors.border,
+							}}
+						>
+							<Text
+								style={{
+									fontSize: 14,
+									fontWeight: '600',
+									color: colors.textSecondary,
+								}}
+							>
 								Friends ({user.friend_list.length})
 							</Text>
 						</View>
 						<FlatList
 							data={user.friend_list}
-							renderItem={({ item, index }) => {
+							renderItem={({ item }) => {
 								const presence = getUserPresence(item.uid);
 								return (
-									<Card style={{ marginHorizontal: 16, marginVertical: 4, backgroundColor: colors.surface }}>
+									<Card
+										style={{
+											marginHorizontal: 16,
+											marginVertical: 4,
+											backgroundColor: colors.surface,
+											borderRadius: 14,
+											borderWidth: 1,
+											borderColor: colors.border,
+										}}
+									>
 										<View className="flex-row items-center p-3">
 											<View className="relative">
-												<Avatar.Image 
-													size={48} 
-													source={{ uri: item.photo_url }} 
+												<Avatar.Image size={48} source={{ uri: item.photo_url }} />
+												<View
+													style={{
+														position: 'absolute',
+														bottom: 0,
+														right: 0,
+														width: 14,
+														height: 14,
+														borderRadius: 7,
+														borderWidth: 2,
+														borderColor: colors.surface,
+														backgroundColor: presence?.is_online ? colors.primary : colors.textSecondary,
+													}}
 												/>
-												<View className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${
-													presence?.is_online ? 'bg-green-500' : 'bg-gray-400'
-												}`} />
 											</View>
 											<View className="flex-1 ml-3">
-												<Text style={{ 
-													fontSize: 16, 
-													fontWeight: '600', 
-													color: colors.text 
-												}}>
+												<Text
+													style={{
+														fontSize: 16,
+														fontWeight: '600',
+														color: colors.text,
+													}}
+												>
 													{item.name}
 												</Text>
-												<Text style={{ 
-													fontSize: 12, 
-													color: colors.textSecondary 
-												}}>
-													{presence?.is_online 
-														? 'Online' 
-														: `Last seen ${formatLastSeen(presence?.last_seen || null)}`
-													}
+												<Text
+													style={{
+														fontSize: 12,
+														color: colors.textSecondary,
+														marginTop: 2,
+													}}
+												>
+													{presence?.is_online
+														? 'Online'
+														: `Last seen ${formatLastSeen(presence?.last_seen || null)}`}
 												</Text>
 											</View>
 										</View>
@@ -238,18 +292,22 @@ export default function Friends() {
 					renderEmptyState()
 				) : (
 					<View className="flex-1">
-						<View style={{ 
-							paddingHorizontal: 16, 
-							paddingVertical: 12, 
-							backgroundColor: colors.surface, 
-							borderBottomWidth: 1, 
-							borderBottomColor: colors.border 
-						}}>
-							<Text style={{ 
-								fontSize: 14, 
-								fontWeight: '600', 
-								color: colors.text 
-							}}>
+						<View
+							style={{
+								paddingHorizontal: 16,
+								paddingVertical: 12,
+								backgroundColor: colors.background,
+								borderBottomWidth: 1,
+								borderBottomColor: colors.border,
+							}}
+						>
+							<Text
+								style={{
+									fontSize: 14,
+									fontWeight: '600',
+									color: colors.textSecondary,
+								}}
+							>
 								Friend Requests ({user?.received_friend_requests?.length})
 							</Text>
 						</View>
@@ -270,29 +328,36 @@ export default function Friends() {
 				{/* Search Results Modal */}
 				<Portal>
 					<Modal
-						contentContainerStyle={{ 
-							backgroundColor: colors.surface, 
-							padding: 20, 
+						contentContainerStyle={{
+							backgroundColor: colors.surface,
+							padding: 20,
 							margin: 20,
-							borderRadius: 16,
-							maxHeight: '80%'
+							borderRadius: 18,
+							maxHeight: '80%',
+							borderWidth: 1,
+							borderColor: colors.border,
 						}}
 						visible={openFetchedUsersModal}
 						onDismiss={closeModal}
 					>
 						<View className="flex-row items-center justify-between mb-4">
 							<View>
-								<Text style={{ 
-									fontSize: 20, 
-									fontWeight: 'bold', 
-									color: colors.text 
-								}}>
+								<Text
+									style={{
+										fontSize: 20,
+										fontWeight: '700',
+										color: colors.text,
+									}}
+								>
 									Search Results
 								</Text>
-								<Text style={{ 
-									fontSize: 14, 
-									color: colors.textSecondary 
-								}}>
+								<Text
+									style={{
+										fontSize: 14,
+										color: colors.textSecondary,
+										marginTop: 2,
+									}}
+								>
 									Found {fetchedUsers.length} users
 								</Text>
 							</View>

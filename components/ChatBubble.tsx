@@ -140,15 +140,24 @@ export default function ChatBubble({ message, isGroup, roomId }: { message: Chat
 								gap: 8, 
 								alignItems: 'center' 
 							}}>
-								<Avatar.Image 
-									size={28} 
-									source={{ uri: isAIMessage ? 'https://ui-avatars.com/api/?name=AI&background=6366f1&color=ffffff' : message.userPhoto }} 
+								<Avatar.Image
+									size={28}
+									source={{
+										uri: isAIMessage
+											? 'https://ui-avatars.com/api/?name=AI&background=3b82f6&color=ffffff'
+											: message.userPhoto,
+									}}
 								/>
 								<Text style={{ color: colors.textSecondary }}>
 									{isAIMessage ? 'Chatify AI' : message.userName}
 								</Text>
 								{isAIMessage && (
-									<Chip icon="robot" compact style={{ height: 20 }}>
+									<Chip
+										icon="robot"
+										compact
+										style={{ height: 22, backgroundColor: colors.primary }}
+										textStyle={{ color: colors.primaryForeground, fontSize: 11, fontWeight: '600' }}
+									>
 										AI
 									</Chip>
 								)}
@@ -163,22 +172,24 @@ export default function ChatBubble({ message, isGroup, roomId }: { message: Chat
 								onLongPress={openMenu}
 								delayLongPress={500}
 							>
-								<View style={{
-									backgroundColor: isSelf
-										? '#3b82f6' // Primary blue for self messages
-										: isAIMessage
-											? '#f3f4f6' // Light gray for AI messages
-											: colors.surface, // Theme surface for other messages
-									marginRight: isSelf ? 20 : 0,
-									marginLeft: isSelf ? 0 : 20,
-									borderTopRightRadius: isSelf && !message.isConsecutiveMessage ? 0 : 6,
-									borderTopLeftRadius: !isSelf && !message.isConsecutiveMessage ? 0 : 6,
-									borderRadius: 6,
-									paddingVertical: 8,
-									paddingHorizontal: 16,
-									borderWidth: isAIMessage ? 1 : 0,
-									borderColor: isAIMessage ? colors.border : 'transparent'
-								}}>
+								<View
+									style={{
+										backgroundColor: isSelf
+											? colors.primary
+											: isAIMessage
+												? colors.muted
+												: colors.surface,
+										marginRight: isSelf ? 20 : 0,
+										marginLeft: isSelf ? 0 : 20,
+										borderTopRightRadius: isSelf && !message.isConsecutiveMessage ? 0 : 14,
+										borderTopLeftRadius: !isSelf && !message.isConsecutiveMessage ? 0 : 14,
+										borderRadius: 14,
+										paddingVertical: 10,
+										paddingHorizontal: 16,
+										borderWidth: isAIMessage ? 1 : 0,
+										borderColor: isAIMessage ? colors.border : 'transparent',
+									}}
+								>
 									
 									{/* Image */}
 									{message.type === 'image' && (
