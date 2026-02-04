@@ -1,4 +1,4 @@
-package com.chatify.chatify
+package com.arm8tron.chatify
 
 import android.os.Build
 import android.os.Bundle

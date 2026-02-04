@@ -27,7 +27,7 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="chatify-rne"/>
-        <data android:scheme="com.chatify.chatify"/>
+        <data android:scheme="com.arm8tron.chatify"/>
         <data android:scheme="exp+chatify-rne"/>
       </intent-filter>
     </activity>

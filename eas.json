@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 7.7.0"
+    "version": ">= 7.7.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -27,8 +28,9 @@
     },
     "aab": {
       "android": {
-        "buildType": "apk"
-      }
+        "buildType": "app-bundle"
+      },
+      "distribution": "internal"
     },
     "development-simulator": {
       "developmentClient": true,

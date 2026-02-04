@@ -24,7 +24,7 @@
         "backgroundColor": "#ffffff"
       },
       "googleServicesFile": "./google-services.json",
-      "package": "com.chatify.chatify",
+      "package": "com.arm8tron.chatify",
       "versionCode": 1,
       "permissions": [
         "android.permission.INTERNET",
