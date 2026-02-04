@@ -1,10 +1,34 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { FlatList, Image, View, Alert, ScrollView } from 'react-native'
-import { Avatar, Button, Card, Text, TextInput, useTheme, Icon, ActivityIndicator, IconButton, Menu, Portal, Dialog, ProgressBar, Chip } from 'react-native-paper'
+import { useEffect, useRef, useState } from 'react';
+import { FlatList, Image, View, Alert, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+	Avatar,
+	Button,
+	Card,
+	Text,
+	TextInput,
+	Icon,
+	ActivityIndicator,
+	IconButton,
+	Menu,
+	Portal,
+	Dialog,
+	ProgressBar,
+	Chip,
+	Divider,
+} from 'react-native-paper';
 import { useUser } from '~/app/providers';
 import { ChatMessage } from '~/lib/types';
 import { setActiveRoomId, setLoadingMore, setOfflineMode } from '~/redux/chatSlice';
-import { sendMessageToServer, loadChatHistory, requestConversationSummaryAction, analyzeMessageSentimentAction, getSmartRepliesAction, sendAIChatRequestAction, loadOfflineMessagesForRoom, syncPendingMessages } from '~/redux/socketSlice';
+import {
+	sendMessageToServer,
+	loadChatHistory,
+	requestConversationSummaryAction,
+	analyzeMessageSentimentAction,
+	getSmartRepliesAction,
+	sendAIChatRequestAction,
+	loadOfflineMessagesForRoom,
+	syncPendingMessages,
+} from '~/redux/socketSlice';
 import { useAppDispatch, useAppSelector } from '~/redux/store';
 import ChatBubble from '../components/ChatBubble';
 import GroupChat from '../components/GroupChat';
@@ -17,31 +41,33 @@ import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { uploadFile } from '~/lib/utils';
 import { useTheme as useAppTheme } from '~/lib/themeContext';
+import { useToast } from '~/components/Toast';
+import GlassSurface from '~/components/GlassSurface';
 
 export default function Room() {
-	const activeChatRoomId = useAppSelector(state => state.chat.activeChatRoomId);
-	const activeRoom = useAppSelector(state => state.chat.rooms[activeChatRoomId]);
-	const userPresence = useAppSelector(state => state.chat.userPresence);
-	const isOffline = useAppSelector(state => state.chat.isOffline);
-	const textInputRef = useRef<any>(null); //Fix this
+	const activeChatRoomId = useAppSelector((state) => state.chat.activeChatRoomId);
+	const activeRoom = useAppSelector((state) => state.chat.rooms[activeChatRoomId]);
+	const userPresence = useAppSelector((state) => state.chat.userPresence);
+	const isOffline = useAppSelector((state) => state.chat.isOffline);
+	const textInputRef = useRef<any>(null);
 
 	const dispatch = useAppDispatch();
-	const { colors } = useAppTheme();
+	const { colors, isDark } = useAppTheme();
+	const { showToast } = useToast();
 
 	const { user, isOffline: userIsOffline } = useUser() || {};
 
-	const [input, setInput] = useState<string>("");
+	const [input, setInput] = useState<string>('');
 	const [attachMenuVisible, setAttachMenuVisible] = useState(false);
 	const [uploading, setUploading] = useState(false);
 	const [uploadProgress, setUploadProgress] = useState(0);
-	const [aiMenuVisible, setAiMenuVisible] = useState(false);
+	const [moreMenuVisible, setMoreMenuVisible] = useState(false);
 	const [summaryDialogVisible, setSummaryDialogVisible] = useState(false);
-	const [summary, setSummary] = useState<string>("");
+	const [summary, setSummary] = useState<string>('');
 	const [sentimentDialogVisible, setSentimentDialogVisible] = useState(false);
-	const [sentiment, setSentiment] = useState<string>("");
-	const [smartRepliesDialogVisible, setSmartRepliesDialogVisible] = useState(false);
+	const [sentiment, setSentiment] = useState<string>('');
 	const [smartReplies, setSmartReplies] = useState<string[]>([]);
-	const [testMessage, setTestMessage] = useState("");
+	const [testMessage, setTestMessage] = useState('');
 	const [showSmartReplies, setShowSmartReplies] = useState(false);
 	const [showGroupManagement, setShowGroupManagement] = useState(false);
 	const [showGroupMembers, setShowGroupMembers] = useState(false);
@@ -49,62 +75,69 @@ export default function Room() {
 	const [showScheduledMessages, setShowScheduledMessages] = useState(false);
 	const [showSemanticSearch, setShowSemanticSearch] = useState(false);
 
-	// Handle offline mode and load offline messages
 	useEffect(() => {
 		if (activeChatRoomId && activeRoom) {
-			// Update offline mode in Redux
 			dispatch(setOfflineMode(userIsOffline || false));
-			
-			// Load offline messages if in offline mode
 			if (userIsOffline) {
 				dispatch(loadOfflineMessagesForRoom(activeChatRoomId));
 			}
 		}
 	}, [activeChatRoomId, userIsOffline]);
 
-	// Sync pending messages when coming back online
 	useEffect(() => {
 		if (!userIsOffline && !isOffline) {
 			dispatch(syncPendingMessages());
 		}
 	}, [userIsOffline, isOffline]);
 
-	if(activeChatRoomId == '' || activeRoom == null) {
+	if (activeChatRoomId == '' || activeRoom == null) {
 		return null;
 	}
 
 	const generateId = () => {
-		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-			const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+			const r = (Math.random() * 16) | 0,
+				v = c == 'x' ? r : (r & 0x3) | 0x8;
 			return v.toString(16);
 		});
 	};
 
 	const getUserPresence = () => {
-		if(!user) return '';
-		if(!activeRoom) return '';
-		if(activeRoom.is_group) return ''
+		if (!user) return '';
+		if (!activeRoom) return '';
+		if (activeRoom.is_group) return '';
 		const otherUid = (activeRoom.members || []).find((m: any) => m.uid !== user.uid);
-		if(!otherUid) return '';
-		console.log(userPresence[otherUid].is_online);
-		if (userPresence[otherUid].is_online === true) return 'Online';
-		if(userPresence[otherUid]?.last_seen) return `Last seen ${formatLastSeen(userPresence[otherUid]?.last_seen || null)}`;
-		return 'Last seen a while ago';
-	}
+		if (!otherUid) return '';
+		if (userPresence[otherUid]?.is_online === true) return 'Online';
+		if (userPresence[otherUid]?.last_seen)
+			return `Last seen ${formatLastSeen(userPresence[otherUid]?.last_seen || null)}`;
+		return '';
+	};
+
+	const getMemberNames = () => {
+		if (!activeRoom.is_group) return '';
+		const names =
+			activeRoom.members
+				?.map((uid: string) => {
+					if (uid === user?.uid) return 'You';
+					const friend = user?.friend_list?.find((f) => f.uid === uid);
+					return friend?.name?.split(' ')[0] || 'Unknown';
+				})
+				.slice(0, 4)
+				.join(', ') || '';
+		if ((activeRoom.members?.length || 0) > 4) {
+			return names + ', ...';
+		}
+		return names;
+	};
 
 	const getMemberName = (uid: string) => {
-		const friend = user?.friend_list?.find(f => f.uid === uid);
+		const friend = user?.friend_list?.find((f) => f.uid === uid);
 		return friend?.name || 'Unknown User';
 	};
 
-	const getMemberPhoto = (uid: string) => {
-		const friend = user?.friend_list?.find(f => f.uid === uid);
-		return friend?.photo_url || '';
-	};
-
-	const formatLastSeen = (input: string | number | null) => {		
+	const formatLastSeen = (input: string | number | null) => {
 		if (!input) return '';
-		
 		const date = new Date(input);
 		const now = new Date();
 		const diffMs = now.getTime() - date.getTime();
@@ -118,12 +151,8 @@ export default function Room() {
 	};
 
 	const sendMessage = () => {
-		if (input.trim() == "" || input == null) return;
-
-		if (!user || activeChatRoomId == '') {
-			//Show snack message
-			return;
-		}
+		if (input.trim() == '' || input == null) return;
+		if (!user || activeChatRoomId == '') return;
 
 		const chatMessage: ChatMessage = {
 			id: generateId(),
@@ -136,14 +165,14 @@ export default function Room() {
 			time: new Date(),
 			isMsgEdited: false,
 			isMsgSaved: false,
-			fileName: ''
-		}
+			fileName: '',
+		};
 
-		dispatch(sendMessageToServer(chatMessage))
-		setInput("");
-		setShowSmartReplies(false); // Clear smart replies when message is sent
-		if(textInputRef.current) textInputRef.current.blur();
-	}
+		dispatch(sendMessageToServer(chatMessage));
+		setInput('');
+		setShowSmartReplies(false);
+		if (textInputRef.current) textInputRef.current.blur();
+	};
 
 	function handleBackButton() {
 		router.back();
@@ -152,15 +181,15 @@ export default function Room() {
 
 	const handleLoadMore = () => {
 		if (!activeRoom.hasMoreMessages || activeRoom.isLoadingMore) return;
-		
 		dispatch(setLoadingMore({ roomId: activeChatRoomId, isLoading: true }));
 		dispatch(loadChatHistory(activeChatRoomId, activeRoom.currentChatDocId));
 	};
 
 	// AI Functions
 	const handleSummarizeConversation = async () => {
+		setMoreMenuVisible(false);
 		try {
-			const response = await dispatch(requestConversationSummaryAction(activeChatRoomId)) as any;
+			const response = (await dispatch(requestConversationSummaryAction(activeChatRoomId))) as any;
 			if (response.success && response.summary) {
 				setSummary(response.summary);
 				setSummaryDialogVisible(true);
@@ -168,54 +197,34 @@ export default function Room() {
 		} catch (error) {
 			Alert.alert('Error', 'Failed to generate conversation summary');
 		}
-		setAiMenuVisible(false);
 	};
 
 	const handleAnalyzeSentiment = () => {
-		// Get the previous message for sentiment analysis
+		setMoreMenuVisible(false);
 		const messages = activeRoom.messages;
-		const textMessages = messages.filter(msg => !msg.isDate && msg.type === 'text');
-		
+		const textMessages = messages.filter((msg) => !msg.isDate && msg.type === 'text');
 		if (textMessages.length === 0) {
 			Alert.alert('No Messages', 'No text messages found to analyze');
-			setAiMenuVisible(false);
 			return;
 		}
-
-		// Get the last text message
 		const lastMessage = textMessages[textMessages.length - 1];
 		setTestMessage(lastMessage.chatInfo || '');
 		handleSentimentAnalysis();
-		setAiMenuVisible(false);
 	};
 
 	const handleGetSmartReplies = () => {
-		// Get the latest message that's not from the current user
+		setMoreMenuVisible(false);
 		const messages = activeRoom.messages;
-		const otherUserMessages = messages.filter(msg => 
-			!msg.isDate && 
-			msg.type === 'text' && 
-			msg.userUid !== user?.uid
+		const otherUserMessages = messages.filter(
+			(msg) => !msg.isDate && msg.type === 'text' && msg.userUid !== user?.uid
 		);
-		
 		if (otherUserMessages.length === 0) {
 			Alert.alert('No Messages', 'No messages from other users found to generate smart replies');
-			setAiMenuVisible(false);
 			return;
 		}
-
-		// Get the latest message from other users
 		const latestOtherMessage = otherUserMessages[otherUserMessages.length - 1];
 		setTestMessage(latestOtherMessage.chatInfo || '');
 		handleSmartRepliesRequestInline();
-		setAiMenuVisible(false);
-	};
-
-	const handleSendAIMessage = () => {
-		if (!testMessage.trim()) return;
-		dispatch(sendAIChatRequestAction(testMessage, activeChatRoomId));
-		setTestMessage('');
-		setAiMenuVisible(false);
 	};
 
 	const handleSentimentAnalysis = async () => {
@@ -223,13 +232,10 @@ export default function Room() {
 			Alert.alert('Error', 'Please enter a message to analyze');
 			return;
 		}
-
-		// Show the dialog immediately
 		setSentimentDialogVisible(true);
-		setSentiment(''); // Reset sentiment
-
+		setSentiment('');
 		try {
-			const response = await dispatch(analyzeMessageSentimentAction(testMessage)) as any;
+			const response = (await dispatch(analyzeMessageSentimentAction(testMessage))) as any;
 			if (response.success && response.sentiment) {
 				setSentiment(response.sentiment);
 			} else {
@@ -247,13 +253,10 @@ export default function Room() {
 			Alert.alert('Error', 'Please enter a message to get smart replies');
 			return;
 		}
-
-		// Show smart replies above text box
 		setShowSmartReplies(true);
-		setSmartReplies([]); // Reset smart replies
-
+		setSmartReplies([]);
 		try {
-			const response = await dispatch(getSmartRepliesAction(testMessage, activeChatRoomId)) as any;
+			const response = (await dispatch(getSmartRepliesAction(testMessage, activeChatRoomId))) as any;
 			if (response.success && response.replies) {
 				setSmartReplies(response.replies);
 			} else {
@@ -301,7 +304,6 @@ export default function Room() {
 
 	const pickDocument = async () => {
 		setAttachMenuVisible(false);
-	
 		const result = await DocumentPicker.getDocumentAsync({
 			type: '*/*',
 			copyToCacheDirectory: true,
@@ -314,22 +316,20 @@ export default function Room() {
 
 	const handleFileUpload = async (uri: string, fileName: string, type: 'image' | 'file') => {
 		if (!user) return;
-
 		setUploading(true);
 		setUploadProgress(0);
-
 		try {
-			// Simulate progress (you can implement real progress tracking if needed)
 			const progressInterval = setInterval(() => {
-				setUploadProgress(prev => Math.min(prev + 0.1, 0.9));
+				setUploadProgress((prev) => Math.min(prev + 0.1, 0.9));
 			}, 100);
-
-			const downloadUrl = await uploadFile(user.uid, uri, fileName, type === 'image' ? 'image/jpeg' : 'application/octet-stream');
-
+			const downloadUrl = await uploadFile(
+				user.uid,
+				uri,
+				fileName,
+				type === 'image' ? 'image/jpeg' : 'application/octet-stream'
+			);
 			clearInterval(progressInterval);
 			setUploadProgress(1);
-
-			// Send message with file
 			const chatMessage: ChatMessage = {
 				id: generateId(),
 				roomId: activeChatRoomId,
@@ -341,9 +341,8 @@ export default function Room() {
 				userPhoto: user.photo_url,
 				time: new Date(),
 				isMsgEdited: false,
-				isMsgSaved: false
+				isMsgSaved: false,
 			};
-
 			dispatch(sendMessageToServer(chatMessage));
 		} catch (error) {
 			console.error('Upload error:', error);
@@ -356,13 +355,12 @@ export default function Room() {
 
 	const renderListHeader = () => {
 		if (!activeRoom.hasMoreMessages) return null;
-		
 		return (
-			<View className='py-4 flex items-center justify-center'>
+			<View style={styles.loadMoreContainer}>
 				{activeRoom.isLoadingMore ? (
-					<ActivityIndicator size="small" />
+					<ActivityIndicator size="small" color={colors.primary} />
 				) : (
-					<Button mode="text" onPress={handleLoadMore}>
+					<Button mode="text" onPress={handleLoadMore} textColor={colors.primary}>
 						Load More Messages
 					</Button>
 				)}
@@ -371,415 +369,495 @@ export default function Room() {
 	};
 
 	return (
-		<SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-			<View style={{ flex: 1, backgroundColor: colors.background }}>
-				<View
-					style={{
-						paddingHorizontal: 12,
-						paddingVertical: 12,
-						backgroundColor: colors.surface,
-						flexDirection: 'row',
-						justifyContent: 'space-between',
-						alignItems: 'center',
-						borderBottomWidth: 1,
-						borderBottomColor: colors.border,
-					}}
-				>
-					<View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-						<Button
-							onPress={handleBackButton}
-							mode="text"
-							style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}
-							iconColor={colors.primary}
-						>
-							<Icon source="chevron-left" size={28} color={colors.primary} />
-						</Button>
-						<View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-							<Avatar.Image size={48} style={{ marginRight: 8 }} source={{ uri: activeRoom?.photo_url }} />
-							<View style={{ flex: 1 }}>
-								<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-									<Text style={{ fontWeight: '600', color: colors.text }}>{activeRoom.name}</Text>
-									{userIsOffline && (
-										<Chip 
-											icon="wifi-off" 
-											style={{ marginLeft: 8, backgroundColor: colors.surface }}
-											textStyle={{ fontSize: 10, color: colors.text }}
-										>
-											Offline
-										</Chip>
-									)}
-								</View>
-								{activeRoom.is_group ? (
-									<Text style={{ fontSize: 14, color: colors.textSecondary }}>
-										{activeRoom.members?.length || 0} members
-									</Text>
-								) : (
-									<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-										<Text style={{ fontSize: 14, color: colors.textSecondary }}>
-											{getUserPresence()}
+		<SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+			<View style={[styles.content, { backgroundColor: colors.background }]}>
+				{/* Header */}
+				<View style={styles.headerOuter}>
+					<GlassSurface intensity={26} rounded={22} style={styles.headerGlass}>
+						<View style={styles.header}>
+							<TouchableOpacity onPress={handleBackButton} style={styles.backButton}>
+								<Icon source="chevron-left" size={28} color={colors.text} />
+							</TouchableOpacity>
+
+							<TouchableOpacity
+								style={styles.headerInfo}
+								onPress={() => activeRoom.is_group && setShowGroupMembers(true)}
+							>
+								<Avatar.Image size={44} source={{ uri: activeRoom?.photo_url }} />
+								<View style={styles.headerText}>
+									<View style={styles.headerTitleRow}>
+										<Text style={[styles.headerTitle, { color: colors.text }]} numberOfLines={1}>
+											{activeRoom.name}
 										</Text>
+										{userIsOffline && (
+											<View style={[styles.offlineBadge, { backgroundColor: colors.destructive }]}>
+												<Icon source="wifi-off" size={10} color="#fff" />
+											</View>
+										)}
 									</View>
-								)}
+									<Text style={[styles.headerSubtitle, { color: colors.textSecondary }]} numberOfLines={1}>
+										{activeRoom.is_group ? getMemberNames() : getUserPresence()}
+									</Text>
+								</View>
+							</TouchableOpacity>
+
+							<View style={styles.headerActions}>
+								<IconButton
+									icon="phone"
+									size={22}
+									iconColor={colors.text}
+									onPress={() => showToast({ message: 'Voice call coming soon!', type: 'coming-soon' })}
+								/>
+								<IconButton
+									icon="video"
+									size={22}
+									iconColor={colors.text}
+									onPress={() => showToast({ message: 'Video call coming soon!', type: 'coming-soon' })}
+								/>
+								<Menu
+									visible={moreMenuVisible}
+									onDismiss={() => setMoreMenuVisible(false)}
+									anchor={
+										<IconButton
+											icon="dots-vertical"
+											size={22}
+											iconColor={colors.text}
+											onPress={() => setMoreMenuVisible(true)}
+										/>
+									}
+									contentStyle={[styles.menuContent, { backgroundColor: colors.surface }]}
+								>
+							{activeRoom.is_group && (
+								<>
+									<Menu.Item
+										onPress={() => {
+											setMoreMenuVisible(false);
+											setShowGroupMembers(true);
+										}}
+										title="View Members"
+										leadingIcon="account-multiple"
+									/>
+									<Divider />
+								</>
+							)}
+							<Menu.Item
+								onPress={() => {
+									setMoreMenuVisible(false);
+									setShowSemanticSearch(true);
+								}}
+								title="Search in Chat"
+								leadingIcon="magnify"
+							/>
+							<Divider />
+							<Menu.Item
+								onPress={() => {
+									setMoreMenuVisible(false);
+									setShowScheduledMessages(true);
+								}}
+								title="Scheduled Messages"
+								leadingIcon="clock-outline"
+							/>
+							<Menu.Item
+								onPress={() => {
+									setMoreMenuVisible(false);
+									setShowScheduleDialog(true);
+								}}
+								title="Schedule Message"
+								leadingIcon="clock-plus"
+							/>
+							<Divider />
+							<Text style={[styles.menuSectionTitle, { color: colors.textSecondary }]}>AI Features</Text>
+							<Menu.Item onPress={handleSummarizeConversation} title="Summarize Chat" leadingIcon="text-box-outline" />
+							<Menu.Item onPress={handleAnalyzeSentiment} title="Analyze Sentiment" leadingIcon="emoticon-outline" />
+							<Menu.Item onPress={handleGetSmartReplies} title="Smart Replies" leadingIcon="lightbulb-outline" />
+								</Menu>
 							</View>
 						</View>
+					</GlassSurface>
+				</View>
+
+				{/* Messages */}
+				<FlatList
+					data={activeRoom.messages}
+					renderItem={({ item }) => <ChatBubble message={item} isGroup={activeRoom.is_group} roomId={activeChatRoomId} />}
+					ListHeaderComponent={renderListHeader}
+					inverted={false}
+					contentContainerStyle={styles.messageList}
+					showsVerticalScrollIndicator={false}
+				/>
+
+				{/* Upload Progress */}
+				{uploading && (
+					<View style={[styles.uploadBar, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
+						<Text style={[styles.uploadText, { color: colors.text }]}>Uploading...</Text>
+						<ProgressBar progress={uploadProgress} color={colors.primary} style={styles.progressBar} />
 					</View>
-					
-					<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-						{activeRoom.is_group && (
-							<IconButton
-								icon="account-multiple"
-								size={24}
-								iconColor={colors.text}
-								onPress={() => setShowGroupMembers(true)}
-							/>
+				)}
+
+				{/* Smart Replies */}
+				{showSmartReplies && (
+					<View style={[styles.smartRepliesBar, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
+						<View style={styles.smartRepliesHeader}>
+							<Text style={[styles.smartRepliesTitle, { color: colors.textSecondary }]}>Smart Replies</Text>
+							<IconButton icon="close" size={18} iconColor={colors.textSecondary} onPress={() => setShowSmartReplies(false)} />
+						</View>
+						{smartReplies.length > 0 ? (
+							<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.smartRepliesScroll}>
+								{smartReplies.map((reply, index) => (
+									<TouchableOpacity
+										key={index}
+										style={[styles.smartReplyChip, { backgroundColor: isDark ? colors.muted : '#f1f5f9', borderColor: colors.border }]}
+										onPress={() => {
+											setInput(reply);
+											setShowSmartReplies(false);
+										}}
+									>
+										<Text style={[styles.smartReplyText, { color: colors.text }]}>{reply}</Text>
+									</TouchableOpacity>
+								))}
+							</ScrollView>
+						) : (
+							<View style={styles.smartRepliesLoading}>
+								<ActivityIndicator size="small" color={colors.primary} />
+								<Text style={[styles.loadingText, { color: colors.textSecondary }]}>Generating replies...</Text>
+							</View>
 						)}
-						<IconButton
-							icon="magnify"
-							size={24}
-							iconColor={colors.primary}
-							onPress={() => setShowSemanticSearch(true)}
-						/>
-						<IconButton
-							icon="clock-outline"
-							size={24}
-							iconColor={colors.text}
-							onPress={() => setShowScheduledMessages(true)}
-						/>
-						<IconButton
-							icon="clock-plus"
-							size={24}
-							iconColor={colors.text}
-							onPress={() => setShowScheduleDialog(true)}
-						/>
-						<Menu
-							visible={aiMenuVisible}
-							onDismiss={() => setAiMenuVisible(false)}
-							anchor={
-								<IconButton
-									icon="robot"
-									size={24}
-									iconColor={colors.primary}
-									onPress={() => setAiMenuVisible(true)}
-								/>
-							}
-						>
-							<Menu.Item onPress={handleSummarizeConversation} title="Summarize" leadingIcon="text-box-outline" />
-							<Menu.Item onPress={handleAnalyzeSentiment} title="Sentiment" leadingIcon="emoticon-outline" />
-							<Menu.Item onPress={handleGetSmartReplies} title="Smart Replies" leadingIcon="lightbulb-outline" />
-							<Menu.Item onPress={handleSendAIMessage} title="Ask AI" leadingIcon="chat" />
-						</Menu>
 					</View>
-				</View>
-			<FlatList
-				data={activeRoom.messages}
-				renderItem={({ item }) => <ChatBubble message={item} isGroup={activeRoom.is_group} roomId={activeChatRoomId}/>}
-				ListHeaderComponent={renderListHeader}
-				inverted={false}
-			/>
-			
-			{/* Upload Progress */}
-			{uploading && (
-				<View
-					style={{
-						paddingHorizontal: 16,
-						paddingVertical: 10,
-						backgroundColor: colors.muted,
-						borderTopWidth: 1,
-						borderTopColor: colors.border,
-					}}
-				>
-					<Text style={{ fontSize: 14, color: colors.text, marginBottom: 6, fontWeight: '500' }}>
-						Uploading...
-					</Text>
-					<ProgressBar progress={uploadProgress} color={colors.primary} />
-				</View>
-			)}
+				)}
 
-			{/* Smart Replies */}
-			{showSmartReplies && (
-				<View
-					style={{
-						paddingHorizontal: 16,
-						paddingVertical: 12,
-						backgroundColor: colors.surface,
-						borderTopWidth: 1,
-						borderTopColor: colors.border,
-					}}
-				>
-					<View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-						<Text style={{ fontSize: 12, color: colors.text }}>
-							Smart replies for: "{testMessage}"
-						</Text>
-						<IconButton
-							icon="close"
-							size={16}
-							iconColor={colors.textSecondary}
-							onPress={() => setShowSmartReplies(false)}
-						/>
+				{/* Offline Indicator */}
+				{userIsOffline && (
+					<View style={[styles.offlineBar, { backgroundColor: colors.destructive }]}>
+						<Icon source="wifi-off" size={16} color="#fff" />
+						<Text style={styles.offlineText}>You're offline. Messages will sync when connected.</Text>
 					</View>
-					{smartReplies.length > 0 ? (
-						<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-							{smartReplies.map((reply, index) => (
-								<Button
-									key={index}
-									mode="outlined"
-									compact
-									onPress={() => {
-										setInput(reply);
-										setShowSmartReplies(false);
+				)}
+
+				{/* Input Bar */}
+				<View style={styles.inputOuter}>
+					<GlassSurface intensity={26} rounded={26} style={styles.inputGlass}>
+						<View style={styles.inputBar}>
+							<Menu
+								visible={attachMenuVisible}
+								onDismiss={() => setAttachMenuVisible(false)}
+								anchor={
+									<IconButton
+										icon="plus"
+										size={24}
+										iconColor={colors.primary}
+										style={[styles.attachButton, { backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(2,6,23,0.06)' }]}
+										onPress={() => setAttachMenuVisible(true)}
+										disabled={uploading || userIsOffline}
+									/>
+								}
+								contentStyle={{ backgroundColor: colors.surface }}
+							>
+								<Menu.Item onPress={takePhoto} title="Camera" leadingIcon="camera" />
+								<Menu.Item onPress={pickImage} title="Gallery" leadingIcon="image" />
+								<Menu.Item onPress={pickDocument} title="Document" leadingIcon="file" />
+							</Menu>
+
+							<View style={[styles.inputWrapper, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(2,6,23,0.05)' }]}>
+								<TextInput
+									ref={textInputRef}
+									value={input}
+									mode="flat"
+									onChangeText={(e) => {
+										setInput(e);
+										if (e.length > 0 && showSmartReplies) setShowSmartReplies(false);
 									}}
-									style={{ marginRight: 8, marginBottom: 6, borderColor: colors.primary }}
-									labelStyle={{ color: colors.primary }}
-								>
-									{reply}
-								</Button>
-							))}
-						</View>
-					) : (
-						<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-							<ActivityIndicator size="small" />
-							<Text style={{ fontSize: 12, color: colors.textSecondary }}>
-								Generating smart replies...
-							</Text>
-						</View>
-					)}
-				</View>
-			)}
-			
-			{/* Offline message indicator */}
-			{userIsOffline && (
-				<View
-					style={{
-						paddingHorizontal: 16,
-						paddingVertical: 10,
-						backgroundColor: colors.muted,
-						borderTopWidth: 1,
-						borderTopColor: colors.border,
-					}}
-				>
-					<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-						<Icon source="wifi-off" size={18} color={colors.destructive} />
-						<Text
-							style={{
-								fontSize: 13,
-								color: colors.destructive,
-								flex: 1,
-								marginLeft: 10,
-								fontWeight: '500',
-							}}
-						>
-							You're offline. Messages will be sent when connection is restored.
-						</Text>
-					</View>
-				</View>
-			)}
+									placeholder="Type here"
+									style={styles.textInput}
+									disabled={uploading}
+									underlineColor="transparent"
+									activeUnderlineColor="transparent"
+									textColor={colors.text}
+									placeholderTextColor={colors.textSecondary}
+								/>
+								<IconButton
+									icon="camera-outline"
+									size={22}
+									iconColor={colors.textSecondary}
+									onPress={takePhoto}
+									disabled={uploading || userIsOffline}
+								/>
+							</View>
 
-			<View
-				style={{
-					flexDirection: 'row',
-					alignItems: 'center',
-					width: '100%',
-					gap: 4,
-					paddingHorizontal: 12,
-					paddingVertical: 10,
-					backgroundColor: colors.surface,
-					borderTopWidth: 1,
-					borderTopColor: colors.border,
-				}}
-			>
-				<Menu
-					visible={attachMenuVisible}
-					onDismiss={() => setAttachMenuVisible(false)}
-					anchor={
-						<IconButton
-							icon="attachment"
-							size={24}
-							iconColor={colors.text}
-							onPress={() => setAttachMenuVisible(true)}
-							disabled={uploading || userIsOffline}
-						/>
-					}
-				>
-					<Menu.Item onPress={takePhoto} title="Take Photo" leadingIcon="camera" />
-					<Menu.Item onPress={pickImage} title="Photo & Video" leadingIcon="image" />
-					<Menu.Item onPress={pickDocument} title="Document" leadingIcon="file" />
-				</Menu>
-				
-				<TextInput
-					ref={textInputRef}
-					value={input}
-					mode="outlined"
-					onChangeText={(e) => {
-						setInput(e);
-						if (e.length > 0 && showSmartReplies) setShowSmartReplies(false);
-					}}
-					placeholder={userIsOffline ? 'Type a message (offline)...' : 'Type a message...'}
-					style={{ flex: 1, backgroundColor: colors.background, borderRadius: 24 }}
-					disabled={uploading}
-					outlineColor={colors.border}
-					activeOutlineColor={colors.primary}
-					textColor={colors.text}
-				/>
-				<IconButton
-					icon="send"
-					size={24}
-					iconColor={input.trim() ? colors.primary : colors.textSecondary}
-					onPress={sendMessage}
-					disabled={uploading || !input.trim()}
-				/>
+							<IconButton
+								icon="send"
+								size={24}
+								iconColor="#fff"
+								style={[styles.sendButton, { backgroundColor: input.trim() ? colors.primary : colors.textSecondary }]}
+								onPress={sendMessage}
+								disabled={uploading || !input.trim()}
+							/>
+						</View>
+					</GlassSurface>
+				</View>
 			</View>
 
-			</View>
-
-			{/* AI Dialogs */}
+			{/* Dialogs */}
 			<Portal>
-				{/* Summary Dialog */}
-				<Dialog visible={summaryDialogVisible} onDismiss={() => setSummaryDialogVisible(false)}>
-					<Dialog.Title>Conversation Summary</Dialog.Title>
+				<Dialog visible={summaryDialogVisible} onDismiss={() => setSummaryDialogVisible(false)} style={{ backgroundColor: colors.surface }}>
+					<Dialog.Title style={{ color: colors.text }}>Chat Summary</Dialog.Title>
 					<Dialog.Content>
-						<Text>{summary}</Text>
+						<Text style={{ color: colors.text }}>{summary}</Text>
 					</Dialog.Content>
 					<Dialog.Actions>
-						<Button onPress={() => setSummaryDialogVisible(false)}>Close</Button>
+						<Button onPress={() => setSummaryDialogVisible(false)} textColor={colors.primary}>
+							Close
+						</Button>
 					</Dialog.Actions>
 				</Dialog>
 
-				{/* Sentiment Analysis Dialog */}
-				<Dialog visible={sentimentDialogVisible} onDismiss={() => setSentimentDialogVisible(false)}>
-					<Dialog.Title>Sentiment Analysis</Dialog.Title>
+				<Dialog visible={sentimentDialogVisible} onDismiss={() => setSentimentDialogVisible(false)} style={{ backgroundColor: colors.surface }}>
+					<Dialog.Title style={{ color: colors.text }}>Sentiment Analysis</Dialog.Title>
 					<Dialog.Content>
-						<Text variant="bodyMedium" className="mb-3">
-							Analyzing: "{testMessage}"
-						</Text>
+						<Text style={{ color: colors.textSecondary, marginBottom: 12 }}>Analyzing: "{testMessage}"</Text>
 						{sentiment ? (
-							<View className="flex-row items-center gap-2 p-3 bg-gray-100 rounded">
-								<Icon 
+							<View style={[styles.sentimentResult, { backgroundColor: isDark ? colors.muted : '#f1f5f9' }]}>
+								<Icon
 									source={sentiment === 'positive' ? 'emoticon-happy' : sentiment === 'negative' ? 'emoticon-sad' : 'emoticon-neutral'}
-									size={24}
+									size={28}
+									color={sentiment === 'positive' ? '#10b981' : sentiment === 'negative' ? '#ef4444' : '#f59e0b'}
 								/>
-								<Text variant="titleMedium">
+								<Text style={[styles.sentimentText, { color: colors.text }]}>
 									{sentiment.charAt(0).toUpperCase() + sentiment.slice(1)}
 								</Text>
 							</View>
 						) : (
-							<View className="flex-row items-center gap-2 p-3">
-								<ActivityIndicator size="small" />
-								<Text>Analyzing sentiment...</Text>
+							<View style={styles.smartRepliesLoading}>
+								<ActivityIndicator size="small" color={colors.primary} />
+								<Text style={[styles.loadingText, { color: colors.textSecondary }]}>Analyzing...</Text>
 							</View>
 						)}
 					</Dialog.Content>
 					<Dialog.Actions>
-						<Button onPress={() => setSentimentDialogVisible(false)}>Close</Button>
+						<Button onPress={() => setSentimentDialogVisible(false)} textColor={colors.primary}>
+							Close
+						</Button>
 					</Dialog.Actions>
 				</Dialog>
 
-				{/* Smart Replies Dialog */}
-				<Dialog visible={smartRepliesDialogVisible} onDismiss={() => setSmartRepliesDialogVisible(false)}>
-					<Dialog.Title>Smart Reply Suggestions</Dialog.Title>
-					<Dialog.Content>
-						<Text variant="bodyMedium" className="mb-3">
-							Replying to: "{testMessage}"
-						</Text>
-						{smartReplies.length > 0 ? (
-							<View className="gap-2">
-								{smartReplies.map((reply, index) => (
-									<Button
-										key={index}
-										mode="outlined"
-										onPress={() => {
-											setInput(reply);
-											setSmartRepliesDialogVisible(false);
-										}}
-										className="mb-1"
-									>
-										{reply}
-									</Button>
-								))}
-							</View>
-						) : (
-							<View className="flex-row items-center gap-2 p-3">
-								<ActivityIndicator size="small" />
-								<Text>Generating smart replies...</Text>
-							</View>
-						)}
-					</Dialog.Content>
-					<Dialog.Actions>
-						<Button onPress={() => setSmartRepliesDialogVisible(false)}>Close</Button>
-					</Dialog.Actions>
-				</Dialog>
-
-				{/* Group Members Dialog */}
-				<Dialog visible={showGroupMembers} onDismiss={() => setShowGroupMembers(false)}>
-					<Dialog.Title>Group Members</Dialog.Title>
+				<Dialog visible={showGroupMembers} onDismiss={() => setShowGroupMembers(false)} style={{ backgroundColor: colors.surface }}>
+					<Dialog.Title style={{ color: colors.text }}>Group Members</Dialog.Title>
 					<Dialog.Content>
 						<ScrollView showsVerticalScrollIndicator={false}>
-							{activeRoom.members?.map(uid => {
-								// const presence = getUserPresence();
-								return (
-									<Card key={uid} className="mb-2">
-										<View className="flex-row items-center p-3">
-											{/* <Avatar.Image 
-												size={40} 
-												source={{ uri: getMemberPhoto(uid) }} 
-											/> */}
-											<View className="flex-1 ml-3">
-												<Text variant="titleMedium">{getMemberName(uid)}</Text>
-												<View className="flex-row items-center">
-													{/* <View className={`w-2 h-2 rounded-full mr-1 ${
-														presence?.is_online ? 'bg-green-500' : 'bg-gray-400'
-													}`} />
-													<Text variant="bodySmall" className="text-gray-500">
-														{presence?.is_online 
-															? 'Online' 
-															: `Last seen ${formatLastSeen(presence?.last_seen || null)}`
-														}
-													</Text> */}
-												</View>
-											</View>
-										</View>
-									</Card>
-								);
-							})}
+							{activeRoom.members?.map((uid) => (
+								<View key={uid} style={[styles.memberItem, { borderBottomColor: colors.border }]}>
+									<Text style={[styles.memberName, { color: colors.text }]}>{getMemberName(uid)}</Text>
+								</View>
+							))}
 						</ScrollView>
 					</Dialog.Content>
 					<Dialog.Actions>
-						<Button onPress={() => setShowGroupMembers(false)}>Close</Button>
-						<Button onPress={() => {
-							setShowGroupMembers(false);
-							setShowGroupManagement(true);
-						}}>Manage Group</Button>
+						<Button onPress={() => setShowGroupMembers(false)} textColor={colors.textSecondary}>
+							Close
+						</Button>
+						<Button
+							onPress={() => {
+								setShowGroupMembers(false);
+								setShowGroupManagement(true);
+							}}
+							textColor={colors.primary}
+						>
+							Manage
+						</Button>
 					</Dialog.Actions>
 				</Dialog>
 			</Portal>
 
-			{/* Group Management Modal */}
-			{showGroupManagement && (
-				<GroupChat
-					roomId={activeChatRoomId}
-					onClose={() => setShowGroupManagement(false)}
-				/>
-			)}
-
-			{/* Schedule Message Dialog */}
-			<ScheduleMessageDialog
-				visible={showScheduleDialog}
-				onDismiss={() => setShowScheduleDialog(false)}
-				roomId={activeChatRoomId}
-				initialMessage={input}
-			/>
-
-			{/* Scheduled Messages List */}
-			<ScheduledMessagesList
-				roomId={activeChatRoomId}
-				visible={showScheduledMessages}
-				onClose={() => setShowScheduledMessages(false)}
-			/>
-
-			<SemanticSearchSheet
-				roomId={activeChatRoomId}
-				visible={showSemanticSearch}
-				onClose={() => setShowSemanticSearch(false)}
-			/>
+			{showGroupManagement && <GroupChat roomId={activeChatRoomId} onClose={() => setShowGroupManagement(false)} />}
+			<ScheduleMessageDialog visible={showScheduleDialog} onDismiss={() => setShowScheduleDialog(false)} roomId={activeChatRoomId} initialMessage={input} />
+			<ScheduledMessagesList roomId={activeChatRoomId} visible={showScheduledMessages} onClose={() => setShowScheduledMessages(false)} />
+			<SemanticSearchSheet roomId={activeChatRoomId} visible={showSemanticSearch} onClose={() => setShowSemanticSearch(false)} />
 		</SafeAreaView>
-	)
+	);
 }
+
+const styles = StyleSheet.create({
+	container: { flex: 1 },
+	content: { flex: 1 },
+	headerOuter: {
+		paddingHorizontal: 10,
+		paddingTop: 6,
+	},
+	headerGlass: {
+		borderWidth: 1,
+	},
+	header: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		paddingHorizontal: 8,
+		paddingVertical: 10,
+	},
+	backButton: {
+		padding: 4,
+	},
+	headerInfo: {
+		flex: 1,
+		flexDirection: 'row',
+		alignItems: 'center',
+		marginLeft: 8,
+	},
+	headerText: {
+		flex: 1,
+		marginLeft: 12,
+	},
+	headerTitleRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+	},
+	headerTitle: {
+		fontSize: 17,
+		fontWeight: '600',
+	},
+	offlineBadge: {
+		marginLeft: 6,
+		paddingHorizontal: 4,
+		paddingVertical: 2,
+		borderRadius: 4,
+	},
+	headerSubtitle: {
+		fontSize: 13,
+		marginTop: 1,
+	},
+	headerActions: {
+		flexDirection: 'row',
+		alignItems: 'center',
+	},
+	menuContent: {
+		borderRadius: 12,
+	},
+	menuSectionTitle: {
+		fontSize: 12,
+		fontWeight: '600',
+		paddingHorizontal: 16,
+		paddingTop: 8,
+		paddingBottom: 4,
+	},
+	messageList: {
+		paddingHorizontal: 8,
+		paddingBottom: 8,
+	},
+	loadMoreContainer: {
+		paddingVertical: 12,
+		alignItems: 'center',
+	},
+	uploadBar: {
+		paddingHorizontal: 16,
+		paddingVertical: 10,
+		borderTopWidth: 1,
+	},
+	uploadText: {
+		fontSize: 13,
+		fontWeight: '500',
+		marginBottom: 6,
+	},
+	progressBar: {
+		height: 4,
+		borderRadius: 2,
+	},
+	smartRepliesBar: {
+		paddingHorizontal: 16,
+		paddingVertical: 10,
+		borderTopWidth: 1,
+	},
+	smartRepliesHeader: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+	},
+	smartRepliesTitle: {
+		fontSize: 12,
+		fontWeight: '500',
+	},
+	smartRepliesScroll: {
+		paddingVertical: 8,
+		gap: 8,
+	},
+	smartReplyChip: {
+		paddingHorizontal: 14,
+		paddingVertical: 8,
+		borderRadius: 16,
+		borderWidth: 1,
+		marginRight: 8,
+	},
+	smartReplyText: {
+		fontSize: 14,
+	},
+	smartRepliesLoading: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		paddingVertical: 12,
+		gap: 10,
+	},
+	loadingText: {
+		fontSize: 13,
+	},
+	offlineBar: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		paddingHorizontal: 16,
+		paddingVertical: 8,
+		gap: 8,
+	},
+	offlineText: {
+		color: '#fff',
+		fontSize: 13,
+		fontWeight: '500',
+	},
+	inputOuter: {
+		paddingHorizontal: 10,
+		paddingBottom: 10,
+	},
+	inputGlass: {
+		borderWidth: 1,
+	},
+	inputBar: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		paddingHorizontal: 10,
+		paddingVertical: 10,
+		gap: 6,
+	},
+	attachButton: {
+		margin: 0,
+		borderRadius: 24,
+	},
+	inputWrapper: {
+		flex: 1,
+		flexDirection: 'row',
+		alignItems: 'center',
+		borderRadius: 24,
+		paddingLeft: 16,
+	},
+	textInput: {
+		flex: 1,
+		backgroundColor: 'transparent',
+		fontSize: 16,
+		paddingVertical: 8,
+	},
+	sendButton: {
+		margin: 0,
+		borderRadius: 24,
+	},
+	sentimentResult: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		padding: 16,
+		borderRadius: 12,
+		gap: 12,
+	},
+	sentimentText: {
+		fontSize: 18,
+		fontWeight: '600',
+	},
+	memberItem: {
+		paddingVertical: 12,
+		borderBottomWidth: 1,
+	},
+	memberName: {
+		fontSize: 16,
+	},
+});

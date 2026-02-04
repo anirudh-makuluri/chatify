@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { View, FlatList, ScrollView } from 'react-native'
 import { Button, Icon, Modal, Snackbar, Text, TextInput, Portal, Searchbar, IconButton, Card, Avatar, Chip } from 'react-native-paper'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -224,7 +224,7 @@ export default function Friends() {
 								Friends ({user.friend_list.length})
 							</Text>
 						</View>
-						<FlatList
+						{/* <FlatList
 							data={user.friend_list}
 							renderItem={({ item }) => {
 								const presence = getUserPresence(item.uid);
@@ -283,7 +283,7 @@ export default function Friends() {
 								);
 							}}
 							showsVerticalScrollIndicator={false}
-						/>
+						/> */}
 					</View>
 				)}
 

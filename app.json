@@ -24,15 +24,14 @@
         "backgroundColor": "#ffffff"
       },
       "googleServicesFile": "./google-services.json",
-      "package": "com.arm8tron.chatify",
-      "versionCode": 2,
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.ACCESS_NETWORK_STATE"
-      ]
+      ],
+      "package": "com.arm8tron.chatify"
     },
     "web": {
       "favicon": "./assets/icon.png"

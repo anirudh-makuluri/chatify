@@ -1,228 +1,182 @@
-import React, { useState, useMemo } from 'react'
-import { FlatList, View, Text } from 'react-native'
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Icon, Searchbar, IconButton, FAB, Button } from 'react-native-paper'
-import RoomDisplayItem from '../RoomDisplayItem'
-import GroupChat from '../GroupChat'
-import { useUser } from '~/app/providers'
-import { useTheme } from '~/lib/themeContext'
+import React, { useState, useMemo } from 'react';
+import { FlatList, View, Text, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Icon, IconButton, Button } from 'react-native-paper';
+import RoomDisplayItem from '../RoomDisplayItem';
+import StatusRow from '../StatusRow';
+import FilterTabs, { FilterType } from '../FilterTabs';
+import { useUser } from '~/app/providers';
+import { useTheme } from '~/lib/themeContext';
+import { useToast } from '../Toast';
 
-export default function RoomList() {
+interface RoomListProps {
+	onCreateGroup?: () => void;
+}
+
+export default function RoomList({ onCreateGroup }: RoomListProps) {
 	const { user } = useUser();
-	const { colors } = useTheme();
-	const [searchQuery, setSearchQuery] = useState('');
-	const [showCreateGroup, setShowCreateGroup] = useState(false);
+	const { colors, isDark } = useTheme();
+	const { showToast } = useToast();
+	const [activeFilter, setActiveFilter] = useState<FilterType>('all');
 
 	const insets = useSafeAreaInsets();
-	const bottomPad = insets.bottom || 0; // Only use safe area bottom padding
 
 	const filteredRooms = useMemo(() => {
 		if (!user?.rooms) return [];
-		if (!searchQuery.trim()) return user.rooms;
-		const q = searchQuery.toLowerCase();
-		return user.rooms.filter(room => {
-			const nameMatch = (room.name || '').toLowerCase().includes(q);
-			const messages = Array.isArray(room.messages) ? room.messages : [];
-			const msgMatch = messages.some(msg =>
-				!msg.isDate && msg.type === 'text' && typeof msg.chatInfo === 'string' && msg.chatInfo.toLowerCase().includes(q)
-			);
-			return nameMatch || msgMatch;
-		});
-	}, [user?.rooms, searchQuery]);
+		
+		let rooms = user.rooms;
+		
+		// Apply filter
+		if (activeFilter === 'groups') {
+			rooms = rooms.filter((room) => room.is_group === true);
+		}
+		
+		return rooms;
+	}, [user?.rooms, activeFilter]);
+
+	const handleComingSoon = () => {
+		showToast({ message: 'This feature is coming soon!', type: 'coming-soon' });
+	};
 
 	const renderEmptyState = () => (
-		<View className="justify-center items-center px-8 py-16 mt-10">
-			<View
-				style={{
-					width: 96,
-					height: 96,
-					backgroundColor: colors.muted,
-					borderRadius: 48,
-					alignItems: 'center',
-					justifyContent: 'center',
-					marginBottom: 24,
-				}}
-			>
+		<View style={styles.emptyContainer}>
+			<View style={[styles.emptyIcon, { backgroundColor: isDark ? colors.surface : colors.muted }]}>
 				<Icon source="chat" size={48} color={colors.primary} />
 			</View>
-			<Text
-				style={{
-					fontSize: 22,
-					fontWeight: '700',
-					textAlign: 'center',
-					marginBottom: 8,
-					color: colors.text,
-				}}
-			>
-				No Chats Yet
-			</Text>
-			<Text
-				style={{
-					color: colors.textSecondary,
-					textAlign: 'center',
-					marginBottom: 24,
-					fontSize: 15,
-					lineHeight: 22,
-				}}
-			>
+			<Text style={[styles.emptyTitle, { color: colors.text }]}>No Chats Yet</Text>
+			<Text style={[styles.emptyMessage, { color: colors.textSecondary }]}>
 				Start a conversation by adding friends or creating a group chat
 			</Text>
-			<View
-				style={{
-					backgroundColor: colors.surface,
-					borderRadius: 14,
-					padding: 16,
-					borderWidth: 1,
-					borderColor: colors.border,
-					marginBottom: 20,
-				}}
-			>
-				<Text
-					style={{
-						color: colors.primary,
-						textAlign: 'center',
-						fontWeight: '600',
-						fontSize: 14,
-					}}
-				>
+			<View style={[styles.tipCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+				<Text style={[styles.tipText, { color: colors.primary }]}>
 					💡 Go to Friends tab to add new friends and start chatting!
 				</Text>
 			</View>
-			<Button
-				mode="contained"
-				onPress={() => setShowCreateGroup(true)}
-				icon="account-multiple-plus"
-				style={{ backgroundColor: colors.primary, borderRadius: 12 }}
-			>
-				Create Group Chat
-			</Button>
+			{onCreateGroup && (
+				<Button
+					mode="contained"
+					onPress={onCreateGroup}
+					icon="account-multiple-plus"
+					style={[styles.createButton, { backgroundColor: colors.primary }]}
+				>
+					Create Group Chat
+				</Button>
+			)}
 		</View>
 	);
 
-	return (
-		<SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['bottom']}>
-			<View
-				style={{
-					paddingHorizontal: 16,
-					paddingVertical: 16,
-					borderBottomWidth: 1,
-					borderBottomColor: colors.border,
-					backgroundColor: colors.background,
-				}}
-			>
-				<View className="flex-row items-center justify-between mb-4">
-					<Text
-						style={{
-							fontSize: 26,
-							fontWeight: '700',
-							color: colors.text,
-							letterSpacing: -0.3,
-						}}
-					>
-						Chats
-					</Text>
-				</View>
-				<View className="flex-row items-center gap-3 mb-2">
-					<View
-						style={{
-							flex: 1,
-							backgroundColor: colors.muted,
-							borderRadius: 14,
-							paddingHorizontal: 4,
-							paddingVertical: 2,
-							borderWidth: 1,
-							borderColor: colors.border,
-						}}
-					>
-						<Searchbar
-							placeholder="Search conversations..."
-							value={searchQuery}
-							onChangeText={setSearchQuery}
-							style={{ backgroundColor: 'transparent', elevation: 0 }}
-							placeholderTextColor={colors.textSecondary}
-						/>
-					</View>
-					{searchQuery.length > 0 && (
-						<IconButton
-							icon="close"
-							size={20}
-							iconColor={colors.textSecondary}
-							onPress={() => setSearchQuery('')}
-							style={{ backgroundColor: colors.surface }}
-						/>
-					)}
-				</View>
-				
-				<Text style={{ color: colors.textSecondary }}>
-					{searchQuery ? `${filteredRooms.length} results` : `${user?.rooms?.length || 0} conversations`}
-				</Text>
-			</View>
-			
-			{(() => {
-				const roomsToShow = filteredRooms;
-				
-				// Debug: Show test room if no rooms
-				if (roomsToShow.length === 0 && !searchQuery) {
-					console.log('No rooms found, showing empty state');
-					return renderEmptyState();
-				}
-				
-				if (roomsToShow.length === 0 && searchQuery) {
-					return (
-						<View className="flex-1 justify-center items-center px-8 py-16">
-							<View
-								style={{
-									width: 80,
-									height: 80,
-									backgroundColor: colors.muted,
-									borderRadius: 40,
-									alignItems: 'center',
-									justifyContent: 'center',
-									marginBottom: 16,
-								}}
-							>
-								<Icon source="magnify" size={40} color={colors.textSecondary} />
-							</View>
-							<Text style={{ 
-								fontSize: 18, 
-								fontWeight: '600', 
-								color: colors.textSecondary, 
-								textAlign: 'center', 
-								marginBottom: 8 
-							}}>
-								No Results Found
-							</Text>
-							<Text style={{ color: colors.textSecondary, textAlign: 'center' }}>
-								Try searching with different keywords
-							</Text>
-						</View>
-					);
-				}
-				
-				return (
-					<View style={{ flex: 1 }}>
-						<FlatList
-							data={roomsToShow}
-							renderItem={({ item, index }) => <RoomDisplayItem roomData={item} key={index} />}
-							showsVerticalScrollIndicator={true}
-							contentContainerStyle={{ 
-								paddingVertical: 8, 
-								paddingBottom: Math.max(bottomPad, 16) // Ensure minimum padding
-							}}
-							keyExtractor={(item, index) => item.roomId || index.toString()}
-							style={{ flex: 1 }}
-						/>
-					</View>
-				);
-			})()}
-		
-
-			{/* Group Creation Modal */}
-			{showCreateGroup && (
-				<GroupChat
-					onClose={() => setShowCreateGroup(false)}
+	const renderNoResults = () => (
+		<View style={styles.emptyContainer}>
+			<View style={[styles.emptyIcon, { backgroundColor: isDark ? colors.surface : colors.muted }]}>
+				<Icon
+					source={activeFilter === 'groups' ? 'account-group' : 'magnify'}
+					size={40}
+					color={colors.textSecondary}
 				/>
+			</View>
+			<Text style={[styles.emptyTitle, { color: colors.textSecondary }]}>
+				{activeFilter === 'groups' ? 'No Groups Yet' : 'No Results Found'}
+			</Text>
+			<Text style={[styles.emptyMessage, { color: colors.textSecondary }]}>
+				{activeFilter === 'groups'
+					? 'Create a group to start chatting with multiple friends'
+					: 'Try a different filter'}
+			</Text>
+			{activeFilter === 'groups' && onCreateGroup && (
+				<Button
+					mode="contained"
+					onPress={onCreateGroup}
+					icon="account-multiple-plus"
+					style={[styles.createButton, { backgroundColor: colors.primary }]}
+				>
+					Create Group
+				</Button>
 			)}
-		</SafeAreaView>
-	)
+		</View>
+	);
+
+	const ListHeader = () => (
+		<>
+			{/* Stories/Status Row */}
+			<StatusRow onAddStatusPress={handleComingSoon} />
+
+			{/* Filter Tabs */}
+			<FilterTabs
+				activeFilter={activeFilter}
+				onFilterChange={setActiveFilter}
+				onComingSoon={handleComingSoon}
+			/>
+		</>
+	);
+
+	return (
+		<View style={[styles.container, { backgroundColor: colors.background }]}>
+			{user?.rooms && user.rooms.length > 0 ? (
+				<FlatList
+					data={filteredRooms}
+					ListHeaderComponent={ListHeader}
+					renderItem={({ item }) => <RoomDisplayItem roomData={item} />}
+					showsVerticalScrollIndicator={false}
+					contentContainerStyle={styles.listContent}
+					keyExtractor={(item) => item.roomId}
+					ListEmptyComponent={renderNoResults}
+				/>
+			) : (
+				<>
+					<ListHeader />
+					{renderEmptyState()}
+				</>
+			)}
+		</View>
+	);
 }
+
+const styles = StyleSheet.create({
+	container: {
+		flex: 1,
+	},
+	listContent: {
+		paddingBottom: 100,
+	},
+	emptyContainer: {
+		flex: 1,
+		alignItems: 'center',
+		justifyContent: 'center',
+		paddingHorizontal: 32,
+		paddingVertical: 48,
+	},
+	emptyIcon: {
+		width: 96,
+		height: 96,
+		borderRadius: 48,
+		alignItems: 'center',
+		justifyContent: 'center',
+		marginBottom: 24,
+	},
+	emptyTitle: {
+		fontSize: 22,
+		fontWeight: '700',
+		textAlign: 'center',
+		marginBottom: 8,
+	},
+	emptyMessage: {
+		fontSize: 15,
+		textAlign: 'center',
+		lineHeight: 22,
+		marginBottom: 24,
+	},
+	tipCard: {
+		borderRadius: 14,
+		padding: 16,
+		borderWidth: 1,
+		marginBottom: 20,
+	},
+	tipText: {
+		textAlign: 'center',
+		fontWeight: '600',
+		fontSize: 14,
+	},
+	createButton: {
+		borderRadius: 12,
+	},
+});

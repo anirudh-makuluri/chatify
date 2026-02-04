@@ -8,6 +8,7 @@ import { router } from 'expo-router';
 import { offlineStorage } from '../lib/offlineStorage';
 import NetInfo from '@react-native-community/netinfo';
 import { ThemeProvider, useTheme } from '../lib/themeContext';
+import { ToastProvider } from '../components/Toast';
 
 
 type TUserContext = {
@@ -179,7 +180,9 @@ export function Providers({ children }: { children: ReactNode }) {
 			<ThemeProvider>
 				<UserContext.Provider value={{ user, login, logout, isLoading, isLoggingOut, isOffline, updateUser, loginOffline }}>
 					<ReduxProvider>
-						<PaperThemeGate>{children}</PaperThemeGate>
+						<PaperThemeGate>
+							<ToastProvider>{children}</ToastProvider>
+						</PaperThemeGate>
 					</ReduxProvider>
 				</UserContext.Provider>
 			</ThemeProvider>
