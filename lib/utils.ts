@@ -54,40 +54,52 @@ export function genRoomId(uid1: string, uid2: string): string {
 
 export function formatChatMessages(messages: (ChatDate | ChatMessage)[]) {
 	const formattedMessages: (ChatDate | ChatMessage)[] = [];
-
 	let lastDate: null | string = null;
+
 	messages.forEach((chatEvent, index) => {
-		let lastMessage = messages[index - 1];
-		if(lastMessage == null) {
-			chatEvent.isConsecutiveMessage = false;
-		} else {
-			if(lastMessage.isDate) lastMessage = messages[index - 2];
+		if (chatEvent.isDate) return;
+		const msg = chatEvent as ChatMessage;
 
-			chatEvent.isConsecutiveMessage = false;
-			if(chatEvent.userUid == lastMessage.userUid) {
-				chatEvent.isConsecutiveMessage = true;
-			}
+		const prevIndex = index > 0 ? index - 1 : -1;
+		let lastMessage: ChatDate | ChatMessage | null =
+			prevIndex >= 0 ? messages[prevIndex] : null;
+		if (lastMessage?.isDate && prevIndex > 0) {
+			lastMessage = messages[prevIndex - 1];
 		}
+		const isConsecutiveMessage =
+			lastMessage != null &&
+			!lastMessage.isDate &&
+			'userUid' in lastMessage &&
+			lastMessage.userUid === msg.userUid;
 
-		chatEvent.time = new Date(chatEvent.time?._seconds * 1000);
-		
-		const day = String(chatEvent.time.getDate()).padStart(2, '0');
-		const month = String(chatEvent.time.getMonth() + 1).padStart(2, '0');
-		const year = chatEvent.time.getFullYear();
+		const rawTime = msg.time;
+		const time =
+			rawTime != null &&
+			typeof rawTime === 'object' &&
+			'_seconds' in rawTime
+				? new Date((rawTime as { _seconds: number })._seconds * 1000)
+				: rawTime instanceof Date
+					? rawTime
+					: new Date(rawTime);
 
-		if (lastDate == null || lastDate != `${day}-${month}-${year}`) {
+		const day = String(time.getDate()).padStart(2, '0');
+		const month = String(time.getMonth() + 1).padStart(2, '0');
+		const year = time.getFullYear();
+
+		if (lastDate == null || lastDate !== `${day}-${month}-${year}`) {
 			lastDate = `${day}-${month}-${year}`;
-			if (lastDate) {
-				formattedMessages.push({
-					time: formatDateForChat(chatEvent.time),
-					isDate: true,
-				})
-			}
+			formattedMessages.push({
+				time: formatDateForChat(time),
+				isDate: true,
+			});
 		}
 
-		formattedMessages.push(chatEvent);
-	})
-
+		formattedMessages.push({
+			...msg,
+			time,
+			isConsecutiveMessage,
+		});
+	});
 
 	return formattedMessages;
 }
