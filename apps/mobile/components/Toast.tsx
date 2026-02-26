@@ -1,0 +1,163 @@
+import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
+import { View, StyleSheet, Animated, TouchableOpacity } from 'react-native';
+import { Text, Icon } from 'react-native-paper';
+import { useTheme } from '~/lib/themeContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+type ToastType = 'info' | 'success' | 'error' | 'coming-soon';
+
+interface ToastOptions {
+	message: string;
+	type?: ToastType;
+	duration?: number;
+}
+
+interface ToastContextType {
+	showToast: (options: ToastOptions) => void;
+}
+
+const ToastContext = createContext<ToastContextType>({
+	showToast: () => {},
+});
+
+export const useToast = () => useContext(ToastContext);
+
+export function ToastProvider({ children }: { children: React.ReactNode }) {
+	const { colors, isDark } = useTheme();
+	const insets = useSafeAreaInsets();
+	const [toast, setToast] = useState<ToastOptions | null>(null);
+	const fadeAnim = useRef(new Animated.Value(0)).current;
+	const slideAnim = useRef(new Animated.Value(-100)).current;
+
+	const showToast = useCallback((options: ToastOptions) => {
+		setToast(options);
+	}, []);
+
+	useEffect(() => {
+		if (toast) {
+			// Animate in
+			Animated.parallel([
+				Animated.timing(fadeAnim, {
+					toValue: 1,
+					duration: 300,
+					useNativeDriver: true,
+				}),
+				Animated.spring(slideAnim, {
+					toValue: 0,
+					friction: 8,
+					tension: 40,
+					useNativeDriver: true,
+				}),
+			]).start();
+
+			// Auto dismiss
+			const timeout = setTimeout(() => {
+				Animated.parallel([
+					Animated.timing(fadeAnim, {
+						toValue: 0,
+						duration: 200,
+						useNativeDriver: true,
+					}),
+					Animated.timing(slideAnim, {
+						toValue: -100,
+						duration: 200,
+						useNativeDriver: true,
+					}),
+				]).start(() => {
+					setToast(null);
+				});
+			}, toast.duration || 2500);
+
+			return () => clearTimeout(timeout);
+		}
+	}, [toast]);
+
+	const getIcon = (type: ToastType) => {
+		switch (type) {
+			case 'success':
+				return 'check-circle';
+			case 'error':
+				return 'alert-circle';
+			case 'coming-soon':
+				return 'clock-outline';
+			default:
+				return 'information';
+		}
+	};
+
+	const getColors = (type: ToastType) => {
+		switch (type) {
+			case 'success':
+				return { bg: '#10b981', icon: '#fff' };
+			case 'error':
+				return { bg: '#ef4444', icon: '#fff' };
+			case 'coming-soon':
+				return { bg: colors.primary, icon: '#fff' };
+			default:
+				return { bg: isDark ? colors.surface : '#333', icon: '#fff' };
+		}
+	};
+
+	return (
+		<ToastContext.Provider value={{ showToast }}>
+			{children}
+			{toast && (
+				<Animated.View
+					style={[
+						styles.toastContainer,
+						{
+							top: insets.top + 10,
+							opacity: fadeAnim,
+							transform: [{ translateY: slideAnim }],
+						},
+					]}
+				>
+					<View
+						style={[
+							styles.toast,
+							{
+								backgroundColor: getColors(toast.type || 'info').bg,
+							},
+						]}
+					>
+						<Icon
+							source={getIcon(toast.type || 'info')}
+							size={22}
+							color={getColors(toast.type || 'info').icon}
+						/>
+						<Text style={styles.toastText}>{toast.message}</Text>
+					</View>
+				</Animated.View>
+			)}
+		</ToastContext.Provider>
+	);
+}
+
+const styles = StyleSheet.create({
+	toastContainer: {
+		position: 'absolute',
+		left: 16,
+		right: 16,
+		zIndex: 9999,
+		alignItems: 'center',
+	},
+	toast: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		paddingVertical: 14,
+		paddingHorizontal: 20,
+		borderRadius: 12,
+		gap: 12,
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.15,
+		shadowRadius: 12,
+		elevation: 8,
+	},
+	toastText: {
+		color: '#fff',
+		fontSize: 15,
+		fontWeight: '500',
+		flex: 1,
+	},
+});

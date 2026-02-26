@@ -1,0 +1,6 @@
+# Local build outputs (not needed for EAS; reduces upload size)
+builds/*
+
+# Git and IDE
+.git/
+.idea/
