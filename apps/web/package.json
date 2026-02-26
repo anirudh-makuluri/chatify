@@ -26,6 +26,7 @@
     "@reduxjs/toolkit": "^2.2.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "cropperjs": "^1.6.2",
     "dotenv": "^16.4.5",
     "emoji-picker-react": "^4.9.2",
     "firebase": "^10.9.0",

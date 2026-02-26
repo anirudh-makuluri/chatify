@@ -13,6 +13,7 @@ type CropperOverlayType = {
 
 export default function CropperOverlay({ url, isCropperOverlayVisible, setCropperOverlayVisibility, saveCroppedImage } : CropperOverlayType) {
 	const cropperRef = useRef<ReactCropperElement>(null);
+	const shouldRenderCropper = isCropperOverlayVisible && !!url;
 	
 	function handleCrop() {
 		const cropper = cropperRef.current?.cropper;
@@ -24,14 +25,18 @@ export default function CropperOverlay({ url, isCropperOverlayVisible, setCroppe
 				<DialogHeader>
 					<DialogTitle>Crop your image</DialogTitle>
 				</DialogHeader>
-				<Cropper
-					src={url}
-					style={{ height: 400, width: "100%" }}
-					aspectRatio={16 / 16}
-					guides={true}
-					ref={cropperRef}
-				/>
-				<Button onClick={handleCrop}>Submit</Button>
+				{shouldRenderCropper && (
+					<>
+						<Cropper
+							src={url}
+							style={{ height: 400, width: "100%" }}
+							aspectRatio={16 / 16}
+							guides={true}
+							ref={cropperRef}
+						/>
+						<Button onClick={handleCrop}>Submit</Button>
+					</>
+				)}
 			</DialogContent>
 		</Dialog>
 	)
