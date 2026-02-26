@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -56,15 +56,15 @@ export default function ScheduledMessagesList({ roomId, userUid }: ScheduledMess
 		timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
 	});
 
+	const loadScheduledMessages = useCallback(() => {
+		dispatch(getScheduledMessages(userUid, roomId));
+	}, [dispatch, roomId, userUid]);
+
 	useEffect(() => {
 		if (open) {
 			loadScheduledMessages();
 		}
-	}, [open, roomId]);
-
-	const loadScheduledMessages = () => {
-		dispatch(getScheduledMessages(userUid, roomId));
-	};
+	}, [open, loadScheduledMessages]);
 
 	const getMinDateTime = () => {
 		const now = new Date();

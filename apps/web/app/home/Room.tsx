@@ -97,16 +97,31 @@ export default function Room() {
 				console.error('Failed to fetch member keys:', err);
 			});
 		}
-	}, [activeChatRoomId]);
+	}, [activeChatRoomId, fetchKeys]);
 
 	useEffect(() => {
-		searchGiphy();
+		const loadTrendingGifs = async () => {
+			const url = `https://api.giphy.com/v1/gifs/trending?api_key=${config.giphyApiKey}`;
+			const res = await fetch(url).then(res => res.json());
+			const newGifList: TGiphy[] = res.data.map((data: any) => {
+				return {
+					url: data.images.fixed_width_downsampled.url,
+					height: data.images.fixed_width_downsampled.height,
+					width: data.images.fixed_width_downsampled.width
+				}
+			})
+
+			setGifList(newGifList)
+		};
+
+		void loadTrendingGifs();
 	}, []);
 
 	// Track last message for smart replies
 	useEffect(() => {
-		if (activeRoom && activeRoom?.messages?.length > 0) {
-			const lastMsg = activeRoom.messages[activeRoom.messages.length - 1];
+		const messages = activeRoom?.messages || [];
+		if (messages.length > 0) {
+			const lastMsg = messages[messages.length - 1];
 			if (lastMsg && !lastMsg.isDate && lastMsg.chatInfo) {
 				setLastMessageContent(lastMsg.chatInfo);
 			}
@@ -127,7 +142,7 @@ export default function Room() {
 
 			scrollToBottom();
 		}, 500);
-	}, [activeRoom?.messages]);
+	}, [activeRoom?.messages, isNewChatDocLoading]);
 
 	const sendMessage = async () => {
 		if ((input.trim() == "" || input == null) && previewImages.length == 0) return;

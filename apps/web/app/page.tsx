@@ -6,7 +6,6 @@ import { config } from "@/lib/config";
 import { useUser } from "@/app/providers";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Users, Zap, Sparkles, ArrowRight, Bot, Clock, Brain } from "lucide-react";
-import { useEffect, useState } from "react";
 
 
 firebase.initializeApp(config.firebaseConfig)
@@ -16,11 +15,7 @@ provider.setCustomParameters({ prompt: "select_account" })
 export default function Home() {
 	const router = useRouter();
 	const { user } = useUser();
-	const [isVisible, setIsVisible] = useState(false);
-
-	useEffect(() => {
-		setIsVisible(true);
-	}, []);
+	const isVisible = true;
 
 	function navigateToNextPage() {
 		if(user) {

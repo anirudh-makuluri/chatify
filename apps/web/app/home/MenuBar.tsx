@@ -70,11 +70,19 @@ export default function MenuBar() {
 					})
 				}
 			})
-		} else {
-			setNewUserName(user.name)
 		}
 
-	}, [isUserNameEditable]);
+	}, [isUserNameEditable, newUserName, user, socket, updateUser, toast]);
+
+	function onToggleUserNameEdit() {
+		setUserNameEditable((prev) => {
+			const next = !prev;
+			if (!next && user && (newUserName === user.name || newUserName.trim() === "")) {
+				setNewUserName(user.name);
+			}
+			return next;
+		});
+	}
 
 	function logOut() {
 		dispatch(clearRoomData());
@@ -202,7 +210,7 @@ export default function MenuBar() {
 									:
 									<p className='text-lg'>{user?.name}</p>
 							}
-							<Button className='ml-2' onClick={() => setUserNameEditable(prev => !prev)} variant={isUserNameEditable ? 'default' : 'ghost'}>
+							<Button className='ml-2' onClick={onToggleUserNameEdit} variant={isUserNameEditable ? 'default' : 'ghost'}>
 								{
 									isUserNameEditable ?
 										<Save size={18} />

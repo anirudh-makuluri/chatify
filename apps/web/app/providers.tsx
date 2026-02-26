@@ -1,5 +1,5 @@
 'use client'
-import { ReactNode, createContext, useContext, useEffect, useState } from 'react'
+import { ReactNode, createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { ThemeProvider } from "@/components/theme-provider"
 import { customFetch } from '@/lib/utils';
 import { TAuthUser } from '@/lib/types';
@@ -29,58 +29,8 @@ export function Providers({ children }: { children: ReactNode }) {
 	const [isLoading, setLoading] = useState<boolean>(true);
 	const router = useRouter();
 
-	useEffect(() => {
-		if (!user) {
-			login();
-		}
-	}, []);
-
-	function login() {
-		setLoading(true);
-		customFetch({ pathName: 'session' })
-			.then((data) => {
-				if (data.success) {
-
-					const normalizedUser = {
-						...data.user,
-						friend_list: (data.user.friend_list || []).map((u: any) => ({
-							...u,
-							is_online: u.is_online ?? false,
-							last_seen: u.last_seen ?? null
-						})),
-						received_friend_requests: (data.user.received_friend_requests || []).map((u: any) => ({
-							...u,
-							is_online: u.is_online ?? false,
-							last_seen: u.last_seen ?? null
-						})),
-						sent_friend_requests: (data.user.sent_friend_requests || []).map((u: any) => ({
-							...u,
-							is_online: u.is_online ?? false,
-							last_seen: u.last_seen ?? null
-						})),
-						rooms: (data.user.rooms || []).map((r: any) => ({
-							...r,
-							membersData: (r.membersData || []).map((m: any) => ({
-								...m,
-								is_online: m.is_online ?? false,
-								last_seen: m.last_seen ?? null
-							}))
-						}))
-					}
-					setUser(normalizedUser)
-					void ensureE2EEKeys(normalizedUser);
-				}
-			})
-			.catch(error => {
-				console.error('Error fetching user data:', error);
-			}).finally(() => {
-				setLoading(false);
-			})
-	}
-
-	async function ensureE2EEKeys(normalizedUser: TAuthUser) {
+	const ensureE2EEKeys = useCallback(async (normalizedUser: TAuthUser) => {
 		try {
-			// Dynamically import E2EE modules (only on client, after login)
 			const e2eeServiceModule = await import('@/lib/e2ee-service');
 			const deviceManagerModule = await import('@/lib/device-manager');
 			const e2eeApiModule = await import('@/lib/e2ee-api');
@@ -126,7 +76,56 @@ export function Providers({ children }: { children: ReactNode }) {
 		} catch (error) {
 			console.error('E2EE key setup on login failed:', error);
 		}
-	}
+	}, []);
+
+	const login = useCallback(() => {
+		setLoading(true);
+		customFetch({ pathName: 'session' })
+			.then((data) => {
+				if (data.success) {
+
+					const normalizedUser = {
+						...data.user,
+						friend_list: (data.user.friend_list || []).map((u: any) => ({
+							...u,
+							is_online: u.is_online ?? false,
+							last_seen: u.last_seen ?? null
+						})),
+						received_friend_requests: (data.user.received_friend_requests || []).map((u: any) => ({
+							...u,
+							is_online: u.is_online ?? false,
+							last_seen: u.last_seen ?? null
+						})),
+						sent_friend_requests: (data.user.sent_friend_requests || []).map((u: any) => ({
+							...u,
+							is_online: u.is_online ?? false,
+							last_seen: u.last_seen ?? null
+						})),
+						rooms: (data.user.rooms || []).map((r: any) => ({
+							...r,
+							membersData: (r.membersData || []).map((m: any) => ({
+								...m,
+								is_online: m.is_online ?? false,
+								last_seen: m.last_seen ?? null
+							}))
+						}))
+					}
+					setUser(normalizedUser)
+					void ensureE2EEKeys(normalizedUser);
+				}
+			})
+			.catch(error => {
+				console.error('Error fetching user data:', error);
+			}).finally(() => {
+				setLoading(false);
+			})
+	}, [ensureE2EEKeys]);
+
+	useEffect(() => {
+		if (!user) {
+			login();
+		}
+	}, [user, login]);
 
 	function updateUser(newData: Partial<TAuthUser>) {
 		if(!user) return;

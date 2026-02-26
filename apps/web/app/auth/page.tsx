@@ -44,7 +44,7 @@ export default function Page() {
 		if(!isLoading) {
 			setLoadingScreenVisibility(false);
 		}
-	}, [user, isLoading])
+	}, [user, isLoading, router])
 
 
 	async function authWithGoogle() {

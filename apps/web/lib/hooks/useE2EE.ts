@@ -66,7 +66,7 @@ export const useE2EEInitialization = () => {
 
 		console.log('Starting E2EE initialization...');
 		initE2EE();
-	}, []);
+	}, [dispatch]);
 
 	return initialized;
 };

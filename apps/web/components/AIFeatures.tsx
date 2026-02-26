@@ -46,7 +46,7 @@ export default function AIFeatures({ input, setInput, onAISend, lastMessage }: A
 		if (lastMsg && !lastMsg.isDate && lastMsg.userUid !== user?.uid && lastMsg.userUid !== 'ai-assistant') {
 			// generateSmartReplies(lastMsg.chatInfo)
 		}
-	}, [lastMessage])
+	}, [lastMessage, socket, activeChatRoomId, activeRoom?.messages, user?.uid])
 
 	const generateSmartReplies = (message?: string) => {
 		if (!socket || !message) return

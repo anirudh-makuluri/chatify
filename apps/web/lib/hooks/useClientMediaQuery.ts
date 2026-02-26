@@ -1,24 +1,18 @@
 "use client"
 
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
 export function useClientMediaQuery(query : string) {
-  const [matches, setMatches] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    const mediaQueryList = window.matchMedia(query);
-
-    const handleMatchChange = (e : MediaQueryListEvent) => {
-      setMatches(e.matches);
-    };
-
-    mediaQueryList.addEventListener('change', handleMatchChange);
-    setMatches(mediaQueryList.matches);
-
-    return () => {
-      mediaQueryList.removeEventListener('change', handleMatchChange);
-    };
-  }, [query]);
+  const matches = useSyncExternalStore(
+    (onStoreChange) => {
+      const mediaQueryList = window.matchMedia(query);
+      const handleMatchChange = () => onStoreChange();
+      mediaQueryList.addEventListener('change', handleMatchChange);
+      return () => mediaQueryList.removeEventListener('change', handleMatchChange);
+    },
+    () => window.matchMedia(query).matches,
+    () => null
+  );
 
   return matches;
 }

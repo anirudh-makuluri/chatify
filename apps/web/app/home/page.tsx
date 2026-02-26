@@ -27,9 +27,8 @@ export default function Page() {
 	const deviceId = useDeviceId();
 	const isMobile = useClientMediaQuery('(max-width: 600px)');
 
-	const [isLoadingScreenVisible, setLoadingScreenVisibility] = useState(true);
-
 	const [areRoomsInited, setRoomsInited] = useState(false);
+	const isLoadingScreenVisible = !!user && e2eeInitialized && !areRoomsInited;
 
 	useEffect(() => {
 		if (!isLoading && !user) {
@@ -37,7 +36,6 @@ export default function Page() {
 		}
 
 		if (!user || areRoomsInited || !e2eeInitialized) return;
-		setLoadingScreenVisibility(false);
 
 		const roomIds: string[] = user.rooms.map(u => u.roomId);
 
@@ -56,9 +54,9 @@ export default function Page() {
 			}));
 		});
 
-		setRoomsInited(true);
+		queueMicrotask(() => setRoomsInited(true));
 
-	}, [user, isLoading, e2eeInitialized]);
+	}, [user, isLoading, e2eeInitialized, areRoomsInited, deviceId, dispatch, router]);
 
 	useEffect(() => {
 		if (!socket) return;
@@ -156,7 +154,7 @@ export default function Page() {
 			socket.off('presence_update');
 		}
 
-	}, [socket]);
+	}, [socket, user, updateUser, dispatch, deviceId]);
 
 	return (
 		<div className='h-screen flex flex-row overflow-hidden'>
