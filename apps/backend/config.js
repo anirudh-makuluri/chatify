@@ -1,7 +1,7 @@
 require('dotenv').config()
 
 module.exports = {
-	PORT: process.env.PORT,
+	PORT: process.env.PORT || 5000,
 	expiresIn: 60 * 60 * 24 * 60 * 1000, //60 days
 	firebase: {
 		storageBucketName: `${process.env.PROJECT_ID}.appspot.com`
